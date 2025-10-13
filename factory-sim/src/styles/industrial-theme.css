@@ -1,0 +1,497 @@
+/* ============================================================================
+   INDUSTRIAL BLUEPRINT THEME
+   A sleek, technical design system inspired by industrial manufacturing
+   ============================================================================ */
+
+/* ============================================================================
+   ROOT VARIABLES
+   ============================================================================ */
+:root {
+  /* Colors - Industrial Palette */
+  --color-bg-primary: #0a0a0a;
+  --color-bg-secondary: #111111;
+  --color-bg-tertiary: #1a1a1a;
+  
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a0a0a0;
+  --color-text-tertiary: #606060;
+  
+  --color-accent: #ffffff;
+  --color-border: #2a2a2a;
+  --color-border-light: #404040;
+  
+  /* Blueprint colors */
+  --color-blueprint: rgba(255, 255, 255, 0.03);
+  --color-blueprint-line: rgba(255, 255, 255, 0.08);
+  
+  /* Typography */
+  --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --font-mono: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+  
+  /* Animation */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
+}
+
+/* ============================================================================
+   BLUEPRINT BACKGROUND PATTERN
+   ============================================================================ */
+.industrial-container {
+  position: relative;
+  min-height: 100vh;
+  background-color: var(--color-bg-primary);
+  overflow: hidden;
+}
+
+.blueprint-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 1;
+}
+
+/* Grid pattern */
+.blueprint-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(var(--color-blueprint-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-blueprint-line) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: -1px -1px;
+}
+
+/* Technical drawings overlay */
+.blueprint-background::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 10% 20%, var(--color-blueprint) 0%, transparent 50%),
+    radial-gradient(circle at 90% 80%, var(--color-blueprint) 0%, transparent 50%);
+  opacity: 0.5;
+}
+
+/* Floating technical icons */
+.technical-icon {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  opacity: 0.15;
+  animation: float 20s ease-in-out infinite;
+}
+
+.technical-icon-1 { top: 10%; left: 5%; animation-delay: 0s; }
+.technical-icon-2 { top: 30%; right: 8%; animation-delay: -5s; }
+.technical-icon-3 { bottom: 20%; left: 15%; animation-delay: -10s; }
+.technical-icon-4 { top: 60%; right: 20%; animation-delay: -15s; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+/* ============================================================================
+   MAIN CONTENT LAYOUT
+   ============================================================================ */
+.industrial-content {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--spacing-3xl) var(--spacing-xl);
+}
+
+/* ============================================================================
+   HERO SECTION
+   ============================================================================ */
+.industrial-hero {
+  text-align: center;
+  margin-bottom: var(--spacing-3xl);
+  padding: var(--spacing-3xl) 0;
+}
+
+.industrial-hero__label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-md);
+  font-family: var(--font-mono);
+}
+
+.industrial-hero__title {
+  font-size: 4rem;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  line-height: 1.1;
+  margin-bottom: var(--spacing-lg);
+  text-transform: uppercase;
+}
+
+.industrial-hero__subtitle {
+  font-size: 1.125rem;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  max-width: 600px;
+  margin: 0 auto var(--spacing-2xl);
+  line-height: 1.6;
+}
+
+.industrial-hero__divider {
+  width: 100px;
+  height: 1px;
+  background-color: var(--color-border-light);
+  margin: var(--spacing-xl) auto;
+}
+
+/* ============================================================================
+   BUTTONS - MINIMALIST INDUSTRIAL STYLE
+   ============================================================================ */
+.industrial-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 2.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-mono);
+}
+
+.industrial-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--color-text-primary);
+  transition: left var(--transition-base);
+  z-index: -1;
+}
+
+.industrial-button:hover::before {
+  left: 0;
+}
+
+.industrial-button:hover {
+  color: var(--color-bg-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+.industrial-button:active {
+  transform: translateY(0);
+}
+
+.industrial-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.industrial-button--secondary {
+  border-color: var(--color-border-light);
+  color: var(--color-text-secondary);
+}
+
+.industrial-button--secondary::before {
+  background: var(--color-bg-tertiary);
+}
+
+.industrial-button--secondary:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-text-primary);
+}
+
+/* ============================================================================
+   CARDS - TECHNICAL INFO DISPLAYS
+   ============================================================================ */
+.industrial-card {
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  position: relative;
+}
+
+.industrial-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, var(--color-text-primary), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.industrial-card:hover::before {
+  opacity: 0.5;
+}
+
+.industrial-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.industrial-card__title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+}
+
+.industrial-card__meta {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+  font-family: var(--font-mono);
+}
+
+.industrial-card__content {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+/* ============================================================================
+   INFO GRID - TECHNICAL SPECIFICATIONS
+   ============================================================================ */
+.industrial-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.industrial-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-tertiary);
+}
+
+.industrial-info-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  font-family: var(--font-mono);
+}
+
+.industrial-info-value {
+  font-size: 1.25rem;
+  font-weight: 300;
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+}
+
+/* ============================================================================
+   CODE/PREVIEW DISPLAYS
+   ============================================================================ */
+.industrial-code-block {
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-lg);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.industrial-code-block::-webkit-scrollbar {
+  height: 8px;
+}
+
+.industrial-code-block::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+
+.industrial-code-block::-webkit-scrollbar-thumb {
+  background: var(--color-border-light);
+}
+
+/* ============================================================================
+   STATUS INDICATORS
+   ============================================================================ */
+.industrial-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border: 1px solid var(--color-border);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+
+.industrial-status__indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: currentColor;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.industrial-status--success {
+  color: #4ade80;
+  border-color: #4ade80;
+}
+
+.industrial-status--warning {
+  color: #fbbf24;
+  border-color: #fbbf24;
+}
+
+.industrial-status--error {
+  color: #f87171;
+  border-color: #f87171;
+}
+
+.industrial-status--processing {
+  color: #60a5fa;
+  border-color: #60a5fa;
+}
+
+/* ============================================================================
+   ACTION BAR
+   ============================================================================ */
+.industrial-action-bar {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-xl);
+  border-top: 1px solid var(--color-border);
+}
+
+/* ============================================================================
+   LOADING SPINNER - INDUSTRIAL STYLE
+   ============================================================================ */
+.industrial-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-3xl);
+  gap: var(--spacing-lg);
+}
+
+.industrial-loader__spinner {
+  width: 60px;
+  height: 60px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-text-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.industrial-loader__text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+@media (max-width: 768px) {
+  .industrial-hero__title {
+    font-size: 2.5rem;
+  }
+  
+  .industrial-content {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+  
+  .industrial-info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .industrial-action-bar {
+    flex-direction: column;
+  }
+  
+  .industrial-button {
+    width: 100%;
+  }
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+.text-center { text-align: center; }
+.text-mono { font-family: var(--font-mono); }
+.text-uppercase { text-transform: uppercase; }
+.text-primary { color: var(--color-text-primary); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-tertiary { color: var(--color-text-tertiary); }
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: var(--spacing-sm); }
+.mt-2 { margin-top: var(--spacing-md); }
+.mt-3 { margin-top: var(--spacing-lg); }
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: var(--spacing-sm); }
+.mb-2 { margin-bottom: var(--spacing-md); }
+.mb-3 { margin-bottom: var(--spacing-lg); }
+
