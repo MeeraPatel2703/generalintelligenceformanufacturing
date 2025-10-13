@@ -353,8 +353,9 @@ export class BatchMeansAnalyzer {
     };
   }
 
-  private getTValue(alpha: number, df: number): number {
+  private getTValue(_alpha: number, _df: number): number {
     // Simplified - use normal approximation
+    // Parameters prefixed with _ to indicate intentionally unused
     return 1.96; // 95% CI
   }
 

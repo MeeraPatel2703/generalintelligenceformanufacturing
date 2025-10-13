@@ -167,7 +167,6 @@ export class IndustrialDESKernel {
   private enableTracing: boolean = false;
 
   // Configuration
-  private endTime: number = Infinity;
   private warmupTime: number = 0;
 
   // Callbacks
@@ -218,7 +217,6 @@ export class IndustrialDESKernel {
    * FIXED: Peek at next event before extracting to avoid losing events beyond endTime
    */
   run(endTime: number, warmupTime: number = 0): void {
-    this.endTime = endTime;
     this.warmupTime = warmupTime;
 
     const startTime = this.currentTime;
