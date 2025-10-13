@@ -186,20 +186,20 @@ function App() {
   // Mode switcher component
   const ModeSwitcher = () => (
     <div className="mode-switcher">
-      <button onClick={() => { setMode('simple-demo'); window.location.hash = ''; }} className={`mode-btn ${mode === 'simple-demo' ? 'active' : ''}`}>
-        🎯 Simple Demo
-      </button>
       <button onClick={() => { setMode('extraction'); window.location.hash = ''; }} className={`mode-btn ${mode === 'extraction' ? 'active' : ''}`}>
-        Document to DES
+        AGENTIC DES
       </button>
       <button onClick={() => { setMode('editable-des'); window.location.hash = '/editable-des'; }} className={`mode-btn ${mode === 'editable-des' ? 'active' : ''}`}>
-        Editable DES
+        DES EDITOR
       </button>
-      <button onClick={() => { setMode('analysis'); window.location.hash = ''; }} className={`mode-btn ${mode === 'analysis' ? 'active' : ''}`}>
-        CSV Analysis
+      <button onClick={() => { setMode('simple-demo'); window.location.hash = ''; }} className={`mode-btn ${mode === 'simple-demo' ? 'active' : ''}`}>
+        DEMO
       </button>
       <button onClick={() => { setMode('builder'); window.location.hash = ''; }} className={`mode-btn ${mode === 'builder' ? 'active' : ''}`}>
-        Visual Builder
+        BUILDER
+      </button>
+      <button onClick={() => { setMode('analysis'); window.location.hash = ''; }} className={`mode-btn ${mode === 'analysis' ? 'active' : ''}`}>
+        CSV ANALYSIS
       </button>
     </div>
   );
@@ -207,36 +207,40 @@ function App() {
   const modeSwitcherStyles = `
     .mode-switcher {
       position: fixed;
-      top: 1rem;
-      right: 1rem;
+      top: 1.5rem;
+      right: 1.5rem;
       z-index: 1000;
       display: flex;
       gap: 0.5rem;
-      background: white;
+      background: var(--color-bg-secondary, #111);
       padding: 0.5rem;
-      border-radius: 4px;
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--color-border, #2a2a2a);
     }
 
     .mode-btn {
       padding: 0.5rem 1rem;
-      border: 1px solid #cbd5e0;
-      background: white;
-      border-radius: 4px;
+      border: 1px solid var(--color-border-light, #404040);
+      background: transparent;
       cursor: pointer;
-      font-weight: 600;
-      transition: background 0.2s ease;
-      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      font-size: 0.75rem;
+      color: var(--color-text-secondary, #a0a0a0);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-family: var(--font-mono, monospace);
     }
 
     .mode-btn:hover {
-      background: #edf2f7;
+      background: var(--color-bg-tertiary, #1a1a1a);
+      color: var(--color-text-primary, #fff);
+      border-color: var(--color-text-primary, #fff);
     }
 
     .mode-btn.active {
-      background: #3182ce;
-      color: white;
-      border-color: #3182ce;
+      background: var(--color-text-primary, #fff);
+      color: var(--color-bg-primary, #0a0a0a);
+      border-color: var(--color-text-primary, #fff);
     }
   `;
 
@@ -263,7 +267,7 @@ function App() {
   // Document extraction mode
   if (mode === 'extraction') {
     return (
-      <div className="app" style={{ background: '#f5f5f5', minHeight: '100vh' }}>
+      <div className="app">
         <ModeSwitcher />
         <DocumentExtraction />
         <style>{modeSwitcherStyles}</style>
@@ -284,95 +288,130 @@ function App() {
 
   // CSV Analysis mode
   return (
-    <div className="app">
+    <div className="industrial-container">
+      <div className="blueprint-background"></div>
       <ModeSwitcher />
       <style>{modeSwitcherStyles}</style>
-      <div className="container">
-        <h1>Factory Simulation - AI Data Analysis</h1>
+      <div className="industrial-content">
+        <div className="industrial-hero">
+          <div className="industrial-hero__label">Data Analysis</div>
+          <h1 className="industrial-hero__title">CSV ANALYSIS</h1>
+          <div className="industrial-hero__divider"></div>
+          <p className="industrial-hero__subtitle">
+            Upload DCS/SCADA export CSV files for AI-powered factory data analysis
+          </p>
+        </div>
 
         {!csvData && (
-          <div className="upload-section">
+          <div style={{ textAlign: 'center' }}>
             <button
-              className="upload-button"
+              className="industrial-button"
               onClick={handleUploadClick}
               disabled={loading}
             >
               {loading ? 'Loading file...' : 'Upload CSV'}
             </button>
-            <p className="upload-hint">Upload a DCS/SCADA export CSV to analyze factory data</p>
+            <p style={{
+              marginTop: '1rem',
+              fontSize: '0.75rem',
+              color: 'var(--color-text-tertiary)',
+              fontFamily: 'var(--font-mono)',
+              letterSpacing: '0.05em'
+            }}>
+              CSV • DCS EXPORT • SCADA DATA
+            </p>
           </div>
         )}
 
         {error && (
-          <div className="error-message">
-            <strong>Error:</strong> {error}
+          <div className="industrial-card" style={{ borderColor: '#f87171' }}>
+            <div className="industrial-status industrial-status--error" style={{ marginBottom: '1rem' }}>
+              <span className="industrial-status__indicator"></span>
+              ERROR
+            </div>
+            <p style={{ color: 'var(--color-text-secondary)' }}>{error}</p>
           </div>
         )}
 
         {csvData && !analysis && !analyzing && (
-          <div className="data-section">
-            <div className="file-info">
-              <h2>File Information</h2>
-              <div className="info-grid">
-                <div className="info-item">
-                  <span className="info-label">Name:</span>
-                  <span className="info-value">{csvData.fileName}</span>
+          <>
+            <div className="industrial-card">
+              <div className="industrial-card__header">
+                <h2 className="industrial-card__title">File Specifications</h2>
+                <span className="industrial-card__meta">READY FOR ANALYSIS</span>
+              </div>
+
+              <div className="industrial-info-grid">
+                <div className="industrial-info-item">
+                  <span className="industrial-info-label">File Name</span>
+                  <span className="industrial-info-value" style={{ fontSize: '1rem' }}>
+                    {csvData.fileName}
+                  </span>
                 </div>
-                <div className="info-item">
-                  <span className="info-label">Size:</span>
-                  <span className="info-value">{formatFileSize(csvData.fileSize)}</span>
+                <div className="industrial-info-item">
+                  <span className="industrial-info-label">File Size</span>
+                  <span className="industrial-info-value">
+                    {formatFileSize(csvData.fileSize)}
+                  </span>
                 </div>
-                <div className="info-item">
-                  <span className="info-label">Total Rows:</span>
-                  <span className="info-value">{csvData.totalRows.toLocaleString()}</span>
+                <div className="industrial-info-item">
+                  <span className="industrial-info-label">Total Rows</span>
+                  <span className="industrial-info-value">
+                    {csvData.totalRows.toLocaleString()}
+                  </span>
                 </div>
               </div>
             </div>
 
-            <div className="analyze-section">
-              <button className="analyze-button" onClick={handleAnalyzeClick}>
+            <div className="industrial-action-bar">
+              <button className="industrial-button" onClick={handleAnalyzeClick}>
                 Analyze with AI
               </button>
-              <button className="reset-button" onClick={handleReset}>
+              <button className="industrial-button industrial-button--secondary" onClick={handleReset}>
                 Upload Different File
               </button>
             </div>
 
-            <div className="table-section">
-              <h2>Data Preview (First 10 Rows)</h2>
-              <div className="table-wrapper">
-                <table className="data-table">
+            <div className="industrial-card">
+              <div className="industrial-card__header">
+                <h2 className="industrial-card__title">Data Preview</h2>
+                <span className="industrial-card__meta">
+                  SHOWING 10 OF {csvData.totalRows.toLocaleString()} ROWS
+                </span>
+              </div>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{
+                  width: '100%',
+                  borderCollapse: 'collapse',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.875rem'
+                }}>
                   <thead>
-                    <tr>
-                      <th className="row-number">#</th>
+                    <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                      <th style={{ padding: '0.75rem', textAlign: 'left', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.75rem' }}>#</th>
                       {csvData.headers.map((header, index) => (
-                        <th key={index}>{header}</th>
+                        <th key={index} style={{ padding: '0.75rem', textAlign: 'left', color: 'var(--color-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.75rem' }}>{header}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {csvData.rows.slice(0, 10).map((row, rowIndex) => (
-                      <tr key={rowIndex}>
-                        <td className="row-number">{rowIndex + 1}</td>
+                      <tr key={rowIndex} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                        <td style={{ padding: '0.75rem', color: 'var(--color-text-tertiary)' }}>{rowIndex + 1}</td>
                         {row.map((cell, cellIndex) => (
-                          <td key={cellIndex}>{cell}</td>
+                          <td key={cellIndex} style={{ padding: '0.75rem', color: 'var(--color-text-secondary)' }}>{cell}</td>
                         ))}
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-              {csvData.totalRows > 10 && (
-                <p className="preview-note">
-                  Showing 10 of {csvData.totalRows.toLocaleString()} rows
-                </p>
-              )}
             </div>
-          </div>
+          </>
         )}
 
         {analyzing && (
-          <LoadingSpinner message={`AI analyzing ${csvData?.totalRows.toLocaleString()} rows...`} />
+          <LoadingSpinner message={`ANALYZING ${csvData?.totalRows.toLocaleString()} ROWS...`} />
         )}
 
         {analysis && !analyzing && (

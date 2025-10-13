@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react'
-import './LoadingSpinner.css'
 
 interface LoadingSpinnerProps {
   message?: string
 }
 
 const PROGRESS_MESSAGES = [
-  'Parsing CSV data...',
-  'Analyzing machine patterns...',
-  'Calculating cycle times...',
-  'Identifying bottlenecks...',
-  'Finalizing analysis...'
+  'INITIALIZING SYSTEM...',
+  'PARSING DATA STRUCTURES...',
+  'ANALYZING PATTERNS...',
+  'CALCULATING METRICS...',
+  'FINALIZING RESULTS...'
 ]
 
 export function LoadingSpinner({ message }: LoadingSpinnerProps) {
@@ -36,9 +35,12 @@ export function LoadingSpinner({ message }: LoadingSpinnerProps) {
   }, [message])
 
   return (
-    <div className="loading-spinner-container">
-      <div className="spinner"></div>
-      <p className="loading-message">{currentMessage}</p>
+    <div className="industrial-loader">
+      <div className="industrial-loader__spinner"></div>
+      <div className="industrial-status industrial-status--processing">
+        <span className="industrial-status__indicator"></span>
+        {currentMessage}
+      </div>
     </div>
   )
 }

@@ -41,72 +41,57 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{
-          padding: '2rem',
-          maxWidth: '800px',
-          margin: '2rem auto',
-          background: '#fee',
-          border: '2px solid #f00',
-          borderRadius: '8px'
-        }}>
-          <h2 style={{ color: '#c00', marginBottom: '1rem' }}>
-            ⚠️ Something went wrong
-          </h2>
+        <div className="industrial-container">
+          <div className="blueprint-background"></div>
+          <div className="industrial-content">
+            <div className="industrial-card" style={{ borderColor: '#f87171', maxWidth: '800px', margin: '2rem auto' }}>
+              <div className="industrial-status industrial-status--error" style={{ marginBottom: '1rem' }}>
+                <span className="industrial-status__indicator"></span>
+                SYSTEM ERROR
+              </div>
 
-          <div style={{
-            background: '#fff',
-            padding: '1rem',
-            borderRadius: '4px',
-            marginBottom: '1rem'
-          }}>
-            <strong>Error:</strong>
-            <pre style={{
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-              fontSize: '0.9rem',
-              color: '#c00'
-            }}>
-              {this.state.error?.toString()}
-            </pre>
+              <h2 className="industrial-card__title" style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>
+                Critical Failure Detected
+              </h2>
+
+              <div className="industrial-code-block" style={{ marginBottom: '1rem' }}>
+                <strong style={{ color: '#f87171' }}>ERROR:</strong>
+                <pre style={{
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  fontSize: '0.9rem',
+                  marginTop: '0.5rem'
+                }}>
+                  {this.state.error?.toString()}
+                </pre>
+              </div>
+
+              {this.state.errorInfo && (
+                <details className="industrial-code-block" style={{ cursor: 'pointer', marginBottom: '1rem' }}>
+                  <summary style={{ fontWeight: 'bold', marginBottom: '0.5rem', color: 'var(--color-text-primary)' }}>
+                    STACK TRACE
+                  </summary>
+                  <pre style={{
+                    whiteSpace: 'pre-wrap',
+                    fontSize: '0.8rem',
+                    overflow: 'auto',
+                    maxHeight: '400px',
+                    marginTop: '0.5rem'
+                  }}>
+                    {this.state.errorInfo.componentStack}
+                  </pre>
+                </details>
+              )}
+
+              <button
+                className="industrial-button"
+                onClick={() => window.location.reload()}
+                style={{ width: '100%' }}
+              >
+                Reload Application
+              </button>
+            </div>
           </div>
-
-          {this.state.errorInfo && (
-            <details style={{
-              background: '#fff',
-              padding: '1rem',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}>
-              <summary style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>
-                Stack Trace
-              </summary>
-              <pre style={{
-                whiteSpace: 'pre-wrap',
-                fontSize: '0.8rem',
-                color: '#666',
-                overflow: 'auto',
-                maxHeight: '400px'
-              }}>
-                {this.state.errorInfo.componentStack}
-              </pre>
-            </details>
-          )}
-
-          <button
-            onClick={() => window.location.reload()}
-            style={{
-              marginTop: '1rem',
-              padding: '0.75rem 1.5rem',
-              background: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontWeight: '600'
-            }}
-          >
-            🔄 Reload Application
-          </button>
         </div>
       );
     }

@@ -242,14 +242,12 @@ export function DocumentExtraction() {
 
         <div className="industrial-content">
           {/* Hero Section */}
-          {!documentData && !extractedSystem && (
-            <div className="industrial-hero">
-              <div className="industrial-hero__label">Building</div>
-              <h1 className="industrial-hero__title">
-                GENERAL<br />
-                INTELLIGENCE FOR<br />
-                MANUFACTURING
-              </h1>
+                {!documentData && !extractedSystem && (
+                  <div className="industrial-hero">
+                    <div className="industrial-hero__label">Building</div>
+                    <h1 className="industrial-hero__title">
+                      AGENTIC DES
+                    </h1>
               <div className="industrial-hero__divider"></div>
               <p className="industrial-hero__subtitle">
                 Transform natural language documents into executable discrete event simulations.
