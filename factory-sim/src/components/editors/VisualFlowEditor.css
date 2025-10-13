@@ -1,0 +1,346 @@
+/* Visual Flow Editor Styles */
+
+.visual-flow-editor {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  grid-template-rows: 1fr 60px;
+  height: 100vh;
+  background: #0d1117;
+  color: #e6edf3;
+}
+
+/* Sidebar */
+.flow-sidebar {
+  grid-row: 1 / 3;
+  background: #161b22;
+  border-right: 1px solid #30363d;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.flow-sidebar h3 {
+  margin: 0 0 15px 0;
+  font-size: 12px;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.flow-sidebar h4 {
+  margin: 20px 0 10px 0;
+  font-size: 11px;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Component Library */
+.component-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.component-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.component-item:hover {
+  background: #21262d;
+  border-color: #58a6ff;
+}
+
+.component-item.selected {
+  background: #1f6feb;
+  border-color: #1f6feb;
+}
+
+.component-item .icon {
+  font-size: 18px;
+}
+
+.component-item .label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Sidebar Sections */
+.sidebar-section {
+  margin-top: 25px;
+  padding-top: 15px;
+  border-top: 1px solid #21262d;
+}
+
+.node-properties {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.property-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.property-group label {
+  font-size: 11px;
+  color: #8b949e;
+  text-transform: uppercase;
+}
+
+.property-group input {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  color: #e6edf3;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.property-group input:focus {
+  outline: none;
+  border-color: #58a6ff;
+}
+
+.btn-delete {
+  padding: 8px 12px;
+  background: #da3633;
+  border: none;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-delete:hover {
+  background: #f85149;
+}
+
+.empty-state {
+  font-size: 12px;
+  color: #6e7681;
+  font-style: italic;
+}
+
+/* Canvas */
+.flow-canvas {
+  grid-row: 1;
+  grid-column: 2;
+  position: relative;
+  background: #0d1117;
+}
+
+.react-flow {
+  background: #0d1117;
+}
+
+.react-flow__node {
+  cursor: move;
+}
+
+.react-flow__edge-path {
+  stroke: #58a6ff;
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: #1f6feb;
+  stroke-width: 3;
+}
+
+/* Custom Nodes */
+.custom-node {
+  background: #161b22;
+  border: 2px solid #30363d;
+  border-radius: 8px;
+  min-width: 180px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s;
+}
+
+.custom-node:hover {
+  border-color: #58a6ff;
+  box-shadow: 0 4px 16px rgba(88, 166, 255, 0.2);
+}
+
+.custom-node.selected {
+  border-color: #1f6feb;
+  box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.3);
+}
+
+.node-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #1c2128;
+  border-bottom: 1px solid #21262d;
+  border-radius: 6px 6px 0 0;
+}
+
+.node-icon {
+  font-size: 18px;
+}
+
+.node-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e6edf3;
+}
+
+.node-body {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.node-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.node-info .label {
+  color: #8b949e;
+}
+
+.node-info .value {
+  color: #e6edf3;
+  font-weight: 500;
+}
+
+/* Node Handles */
+.node-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #58a6ff;
+  border: 2px solid #0d1117;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.node-handle:hover {
+  width: 16px;
+  height: 16px;
+  background: #1f6feb;
+}
+
+.node-handle.input {
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.node-handle.output {
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Node Type Colors */
+.source-node {
+  border-color: #2ea043;
+}
+
+.source-node:hover,
+.source-node.selected {
+  border-color: #3fb950;
+}
+
+.resource-node {
+  border-color: #1f6feb;
+}
+
+.resource-node:hover,
+.resource-node.selected {
+  border-color: #58a6ff;
+}
+
+.process-node {
+  border-color: #a371f7;
+}
+
+.process-node:hover,
+.process-node.selected {
+  border-color: #b392f0;
+}
+
+.decision-node {
+  border-color: #e3b341;
+}
+
+.decision-node:hover,
+.decision-node.selected {
+  border-color: #f0b72f;
+}
+
+/* Toolbar */
+.flow-toolbar {
+  grid-row: 2;
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px;
+  background: #161b22;
+  border-top: 1px solid #30363d;
+}
+
+.toolbar-btn {
+  padding: 8px 16px;
+  background: #21262d;
+  border: 1px solid #30363d;
+  color: #e6edf3;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toolbar-btn:hover {
+  background: #30363d;
+  border-color: #58a6ff;
+}
+
+/* React Flow Overrides */
+.react-flow__controls {
+  background: #161b22;
+  border: 1px solid #30363d;
+}
+
+.react-flow__controls-button {
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  color: #e6edf3;
+}
+
+.react-flow__controls-button:hover {
+  background: #21262d;
+}
+
+.react-flow__minimap {
+  background: #161b22;
+  border: 1px solid #30363d;
+}
+
+.react-flow__minimap-mask {
+  fill: rgba(88, 166, 255, 0.1);
+}
+
+.react-flow__minimap-node {
+  fill: #30363d;
+  stroke: #58a6ff;
+}

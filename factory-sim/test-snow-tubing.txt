@@ -1,0 +1,28 @@
+The Summit Snow Tubing Facility - Operations Description
+
+System Overview:
+The Summit is a popular snow tubing facility that operates during winter months. Customers arrive throughout the day to enjoy sliding down snow-covered slopes on inflatable tubes.
+
+Arrival Pattern:
+Customer groups arrive at an average rate of 20 groups per hour. Group sizes vary from 1 to 6 people, with most groups having 2-3 members.
+
+Check-in Process:
+Upon arrival, customers proceed to the ticket booth where 2 cashiers process check-ins. The check-in process takes approximately 3 minutes per group (with some variation of about 0.8 minutes). During check-in, customers pay, sign waivers, and receive wristbands.
+
+Equipment Distribution:
+After checking in, customers walk about 100 feet (taking 30-90 seconds) to the tube distribution area where they pick up their snow tubes. This area can accommodate up to 20 customers at once.
+
+Tow Rope System:
+The facility has 8 tow ropes that transport customers up the 500-foot hill. The ride to the top takes exactly 4.5 minutes. Customers grab handles and are pulled to the summit.
+
+Sledding Lanes:
+At the top, there are 12 sledding lanes. Customers take between 2.0 and 3.5 minutes to sled down the hill, depending on snow conditions and their weight.
+
+Repeat Behavior:
+After reaching the bottom, 75% of customers choose to go again, walking back to the tow rope. The remaining 25% return their tubes and exit the facility.
+
+Peak Hours:
+The facility is busiest on weekends from 10 AM to 2 PM.
+
+Performance Goals:
+Management wants to minimize wait times, particularly for the tow rope, and maintain an average customer wait time under 5 minutes.

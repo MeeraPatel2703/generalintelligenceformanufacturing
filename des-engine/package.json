@@ -1,0 +1,22 @@
+{
+  "name": "des-engine",
+  "version": "1.0.0",
+  "description": "Discrete Event Simulation Engine",
+  "type": "module",
+  "scripts": {
+    "test:queue": "tsx test-event-queue.ts",
+    "test:mm1": "tsx test-mm1.ts",
+    "test:replications": "tsx test-replications.ts",
+    "test:mmc": "tsx test-mmc.ts",
+    "test:distributions": "tsx test-distributions.ts",
+    "test:multistage": "tsx test-multistage.ts",
+    "test:snowtubing": "tsx test-snowtubing.ts",
+    "test:all": "tsx test-all.ts",
+    "validate": "tsx run-validation.ts",
+    "validate:verbose": "tsx run-validation.ts --verbose"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,0 +1,189 @@
+UNIVERSITY ADVISING CENTER - DISCRETE EVENT SIMULATION CASE STUDY
+
+SYSTEM OVERVIEW
+================
+The University Advising Center provides academic counseling to students during the fall and spring semesters. The center operates Monday through Friday from 9:00 AM to 5:00 PM. Students can either walk in or schedule appointments.
+
+STUDENT ARRIVALS
+================
+Walk-in Students:
+- Arrive according to a non-homogeneous Poisson process
+- Monday-Wednesday: Peak hours 11 AM-2 PM at 12 students/hour, otherwise 6 students/hour
+- Thursday-Friday: Consistent 8 students/hour throughout the day
+
+Scheduled Appointments:
+- 15-minute time slots from 9:00 AM to 4:45 PM
+- Appointment slots booked at 80% capacity on average
+- Students arrive with normal distribution: mean=scheduled time, std dev=5 minutes
+
+Student Types:
+- 60% Freshmen/Sophomores (longer advising sessions)
+- 30% Juniors/Seniors (shorter sessions)
+- 10% Graduate students (complex advising needs)
+
+RESOURCES
+=========
+Academic Advisors:
+- 3 full-time advisors available
+- Advisor 1: Specializes in freshmen (9 AM - 5 PM, Monday-Friday)
+- Advisor 2: Specializes in upperclassmen (9 AM - 5 PM, Monday-Wednesday)
+- Advisor 3: General advisor (10 AM - 4 PM, Tuesday-Thursday)
+- Each advisor takes a 30-minute lunch break (staggered: 12:00, 12:30, 1:00 PM)
+
+Front Desk Staff:
+- 2 front desk staff members
+- Handle check-in and scheduling
+- Available 9 AM - 5 PM daily
+
+Advising Offices:
+- 4 private advising offices
+- 1 group advising room (capacity: 8 students)
+
+PROCESS FLOW
+============
+
+Walk-in Students:
+1. Check-in at front desk (2-4 minutes, uniform distribution)
+   - Provide student ID
+   - Describe advising need
+   - If all advisors busy and queue > 10, offered appointment instead
+
+2. Wait for available advisor
+   - Freshmen/sophomores preferentially routed to Advisor 1
+   - Graduate students routed to any available advisor
+   - FIFO within priority groups
+
+3. Advising session
+   - Freshmen/Sophomores: Normal(mean=25 min, std dev=8 min)
+   - Juniors/Seniors: Normal(mean=15 min, std dev=5 min)
+   - Graduate students: Normal(mean=35 min, std dev=10 min)
+   - Requires 1 advisor and 1 office
+
+4. Check-out (1-2 minutes, uniform)
+   - Schedule follow-up if needed (30% probability)
+
+Appointment Students:
+1. Check-in (1-2 minutes, uniform)
+   - Verify appointment time
+   - Skip queue if on time
+
+2. Advising session (same durations as walk-ins)
+
+3. Check-out (1-2 minutes)
+
+CONSTRAINTS
+===========
+- Maximum waiting queue: 15 students (fire code)
+- Students willing to wait maximum 45 minutes before leaving (balking)
+- No walk-ins accepted after 4:30 PM
+- Group advising sessions held at 10 AM and 2 PM daily (5-8 students)
+- Advisor utilization should not exceed 90% (burnout prevention)
+
+PERFORMANCE OBJECTIVES
+======================
+Primary Metrics:
+- Average wait time for walk-ins < 20 minutes
+- 95th percentile wait time < 35 minutes
+- Advisor utilization: 65-85% (optimal range)
+- Student satisfaction: >90% seen within 30 minutes
+
+Secondary Metrics:
+- Percentage of students balking: < 5%
+- Appointment no-show rate: 15% (historical average)
+- Office utilization
+- Peak queue length
+
+WHAT-IF SCENARIOS
+=================
+Experiment 1: Staffing Changes
+- Test impact of adding a 4th advisor
+- Evaluate reducing Advisor 2 to part-time (9 AM - 1 PM)
+- Assess Saturday hours (9 AM - 1 PM) with 2 advisors
+
+Experiment 2: Process Improvements
+- Implement virtual check-in (reduces check-in time to 0.5-1 minute)
+- Offer video advising for simple questions (30% of upperclassmen)
+- Group advising for common topics (reduces individual session time)
+
+Experiment 3: Scheduling Optimization
+- What is the optimal appointment slot duration? (15 min vs 20 min vs 30 min)
+- Should we reserve slots for walk-ins?
+- Impact of overbooking appointments by 10%
+
+Experiment 4: Demand Analysis
+- At what arrival rate does the system break down?
+- Effect of finals week (arrival rate doubles)
+- Impact of registration period (25% increase in arrivals)
+
+DATA SOURCES
+============
+Historical Data Available:
+- Semester arrival logs (15,000 student visits)
+- Advisor session durations (logged in system)
+- Student wait times (electronic queue system)
+
+Distributions Fitted from Data:
+- Session durations: Normal distributions (parameters above)
+- Arrival patterns: Non-homogeneous Poisson (rates above)
+- No-show probability: 15% for appointments, 0% for walk-ins
+
+Missing Information:
+- Exact lunch break times for advisors (assume staggered)
+- Student patience thresholds (assume 45 minutes)
+- Video advising adoption rate (pilot program, assume 30%)
+
+ASSUMPTIONS
+===========
+1. Advisors can handle any student type (though specialization preferred)
+2. Office space is not a constraint (4 offices for 3 advisors)
+3. No system failures or advisor sick days
+4. Students arrive independently (no group arrivals)
+5. Session durations independent of wait time experienced
+6. Group advising counts as 1 advisor-hour regardless of group size
+
+VALIDATION TARGETS
+==================
+Model should reproduce these observed statistics:
+- Average daily throughput: 55 students
+- Peak queue length: 12 students (observed maximum)
+- Average advisor utilization: 72%
+- Fraction of time all advisors busy: 35%
+
+SIMULATION PARAMETERS
+=====================
+Warmup Period: 2 weeks (burn-in)
+Run Length: 16 weeks (full semester)
+Replications: 50 (to achieve confidence intervals within ±5%)
+Random Streams: Separate for arrivals, service times, routing decisions
+
+OUTPUT ANALYSIS
+===============
+Required Reports:
+- Time-series plot of queue length
+- Advisor utilization by hour of day
+- Wait time distribution (histogram)
+- Sensitivity to arrival rate (tornado diagram)
+
+Confidence Intervals:
+- 95% CI on mean wait time
+- 95% CI on advisor utilization
+- 95% CI on balking percentage
+
+DECISION SUPPORT
+================
+Use simulation to answer:
+1. Should we hire a 4th advisor? (cost: $50,000/year, value: reduced wait times)
+2. Optimal mix of walk-in vs appointment capacity?
+3. Best advisor schedule to minimize overtime while meeting service levels?
+4. Early warning system: at what queue length should we call in backup advisor?
+
+IMPLEMENTATION NOTES
+====================
+- Model student types as entity attributes
+- Use resource pools for advisors (heterogeneous servers)
+- Implement balking as conditional routing based on queue length
+- Track warmup period separately from main statistics
+- Use common random numbers for comparing scenarios
+- Validate model against historical data before making predictions
+
+END OF CASE STUDY

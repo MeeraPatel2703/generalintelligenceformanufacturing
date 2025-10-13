@@ -1,0 +1,43 @@
+MOUNTAIN PEAK SNOW TUBING OPERATIONS ANALYSIS
+
+System Overview:
+Mountain Peak Resort operates a snow tubing facility that serves groups of customers during 2-hour sessions. The facility needs to optimize operations to minimize wait times while maximizing throughput.
+
+Operational Flow:
+1. Group Arrival: Customers arrive in groups of 2-6 people at the start of each session. Approximately 200 customers arrive during the first 15 minutes of each 2-hour (120 minute) session.
+
+2. Ticket Booth: Upon arrival, each person in the group must purchase a ticket. The facility has 2 ticket booth servers. Service time is uniformly distributed between 0.5 and 1.5 minutes per person.
+
+3. Tube Pickup: After purchasing tickets, customers proceed to the tube pickup area where they receive their tubes. There are 5 tube pickup servers. Service time follows a triangular distribution with minimum 20 seconds, mode 30 seconds, and maximum 45 seconds per customer.
+
+4. Sledding Hill: Once customers have their tubes, they proceed to one of 10 sledding lanes. The sledding hill is 500 feet long. Customers sled down at speeds uniformly distributed between 15 and 19 mph. After reaching the bottom, they walk back up (which takes approximately 2 minutes) and can sled again if time remains in the session.
+
+5. Exit: At the end of the session, customers return their tubes and exit the facility.
+
+Resources:
+- Ticket Booth Servers: 2 (capacity 2)
+- Tube Pickup Servers: 5 (capacity 5)
+- Sledding Lanes: 10 (capacity 10)
+
+Entity Type:
+- Customer (arriving in groups of 2-6 people)
+
+Objectives:
+1. Minimize average wait time at each station
+2. Maximize customer throughput during the 120-minute session
+3. Identify bottlenecks in the system
+4. Determine optimal staffing levels for each station
+
+Current Performance Questions:
+- What is the average wait time at the ticket booth?
+- What is the average wait time at tube pickup?
+- What is the average wait time for sledding lanes?
+- How many customers can complete at least one run during the session?
+- Which station is the bottleneck?
+- What staffing changes would improve throughput?
+
+Simulation Parameters:
+- Session duration: 120 minutes
+- Warm-up period: 0 minutes (customers arrive immediately)
+- Number of replications: 100 (for statistical confidence)
+- Target confidence level: 95%

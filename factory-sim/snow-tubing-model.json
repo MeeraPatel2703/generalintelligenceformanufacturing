@@ -1,0 +1,595 @@
+{
+  "systemType": "service",
+  "systemName": "Summit at Snoqualmie Snow Tubing Facility",
+  "description": "Complete snow tubing facility simulation with 4 daily sessions, batch arrivals, spatial layout, and session-based operations",
+
+  "entities": [
+    {
+      "name": "CustomerGroup",
+      "type": "customer",
+      "arrivalPattern": {
+        "type": "poisson",
+        "rateSchedule": [
+          {
+            "startTime": 0,
+            "endTime": 15,
+            "rate": 700,
+            "comment": "Session 1: 175 customers in 15 min = 700/hr"
+          },
+          {
+            "startTime": 105,
+            "endTime": 120,
+            "rate": 800,
+            "comment": "Session 2: 200 customers in 15 min = 800/hr"
+          },
+          {
+            "startTime": 225,
+            "endTime": 240,
+            "rate": 800,
+            "comment": "Session 3: 200 customers in 15 min = 800/hr"
+          },
+          {
+            "startTime": 345,
+            "endTime": 360,
+            "rate": 740,
+            "comment": "Session 4: 185 customers in 15 min = 740/hr"
+          }
+        ]
+      },
+      "attributes": [
+        {
+          "name": "GroupSize",
+          "type": "number",
+          "distribution": {
+            "type": "empirical",
+            "parameters": {
+              "values": [2, 3, 4, 5, 6],
+              "probabilities": [0.15, 0.20, 0.35, 0.20, 0.10]
+            },
+            "unit": "items"
+          },
+          "description": "Number of people in group (Couples=2, Group3=3, Group4=4, Group5=5, Group6=6)"
+        },
+        {
+          "name": "SessionNumber",
+          "type": "number",
+          "description": "Which session the customer belongs to (1-4)"
+        },
+        {
+          "name": "SessionStartTime",
+          "type": "number",
+          "description": "Session start time in minutes from start of day"
+        },
+        {
+          "name": "SessionEndTime",
+          "type": "number",
+          "description": "Session end time in minutes (105 minutes after start)"
+        },
+        {
+          "name": "TubeNumber",
+          "type": "number",
+          "description": "Which tube the customer picked up"
+        },
+        {
+          "name": "RunCount",
+          "type": "number",
+          "defaultValue": 0,
+          "description": "Number of times customer has sledded"
+        }
+      ],
+      "description": "Customer groups arriving for snow tubing sessions"
+    }
+  ],
+
+  "resources": [
+    {
+      "name": "TicketBooth",
+      "type": "server",
+      "capacity": 2,
+      "processingTime": {
+        "type": "triangular",
+        "parameters": {
+          "min": 0.5,
+          "mode": 0.75,
+          "max": 1.5
+        },
+        "unit": "minutes"
+      },
+      "failures": {
+        "type": "time_based",
+        "mtbf": {
+          "type": "uniform",
+          "parameters": {
+            "min": 60,
+            "max": 120
+          },
+          "unit": "minutes"
+        },
+        "mttr": {
+          "type": "triangular",
+          "parameters": {
+            "min": 1,
+            "mode": 2,
+            "max": 2.5
+          },
+          "unit": "minutes"
+        }
+      },
+      "description": "2 ticket agents verify online purchases (interrupted by phone calls)"
+    },
+    {
+      "name": "TubePickupLane",
+      "type": "server",
+      "capacity": 5,
+      "processingTime": {
+        "type": "triangular",
+        "parameters": {
+          "min": 0.333,
+          "mode": 0.5,
+          "max": 0.75
+        },
+        "unit": "minutes"
+      },
+      "schedule": {
+        "type": "custom",
+        "customAvailability": [
+          {
+            "dayOfWeek": 0,
+            "timeRanges": [
+              { "start": "09:00", "end": "10:00", "comment": "Session 1 pickup window" },
+              { "start": "11:00", "end": "12:00", "comment": "Session 2 pickup window" },
+              { "start": "13:00", "end": "14:00", "comment": "Session 3 pickup window" },
+              { "start": "15:00", "end": "16:00", "comment": "Session 4 pickup window" }
+            ]
+          }
+        ]
+      },
+      "storageCapacity": 250,
+      "description": "5 lanes for tube pickup, open 1 hour per session, 250 tubes total"
+    },
+    {
+      "name": "SleddingLane",
+      "type": "path",
+      "capacity": 10,
+      "speed": 17,
+      "description": "10 sledding lanes, 500 ft long, Uniform(15-19) mph"
+    },
+    {
+      "name": "Conveyor",
+      "type": "conveyor",
+      "capacity": 1,
+      "speed": 1.5,
+      "description": "Conveyor belt going up hill at constant 1.5 mph, one-at-a-time"
+    }
+  ],
+
+  "processes": [
+    {
+      "name": "SnowTubingProcess",
+      "entityType": "CustomerGroup",
+      "routingLogic": "conditional",
+      "sequence": [
+        {
+          "id": "walk-to-ticket-booth",
+          "type": "delay",
+          "duration": {
+            "type": "constant",
+            "parameters": {
+              "value": 0.167
+            },
+            "unit": "minutes"
+          },
+          "description": "Walk 50 ft to ticket booth at 5 mph = 0.167 min"
+        },
+        {
+          "id": "seize-ticket-booth",
+          "type": "seize",
+          "resourceName": "TicketBooth"
+        },
+        {
+          "id": "ticket-verification",
+          "type": "delay",
+          "duration": {
+            "type": "triangular",
+            "parameters": {
+              "min": 0.5,
+              "mode": 0.75,
+              "max": 1.5
+            },
+            "unit": "minutes"
+          },
+          "description": "Verify online purchase with ticket agent"
+        },
+        {
+          "id": "release-ticket-booth",
+          "type": "release",
+          "resourceName": "TicketBooth"
+        },
+        {
+          "id": "walk-to-tube-pickup",
+          "type": "delay",
+          "duration": {
+            "type": "constant",
+            "parameters": {
+              "value": 2.67
+            },
+            "unit": "minutes"
+          },
+          "description": "Walk 800 ft to tube pickup at 5 mph = 2.67 min"
+        },
+        {
+          "id": "seize-tube-lane",
+          "type": "seize",
+          "resourceName": "TubePickupLane"
+        },
+        {
+          "id": "pick-up-tube",
+          "type": "delay",
+          "duration": {
+            "type": "triangular",
+            "parameters": {
+              "min": 0.333,
+              "mode": 0.5,
+              "max": 0.75
+            },
+            "unit": "minutes"
+          },
+          "description": "Select and pick up tube (20-45 seconds)"
+        },
+        {
+          "id": "release-tube-lane",
+          "type": "release",
+          "resourceName": "TubePickupLane"
+        },
+        {
+          "id": "walk-to-hill-top",
+          "type": "delay",
+          "duration": {
+            "type": "constant",
+            "parameters": {
+              "value": 1.33
+            },
+            "unit": "minutes"
+          },
+          "description": "Walk 400 ft to top of hill at 5 mph = 1.33 min"
+        },
+        {
+          "id": "sledding-loop-start",
+          "type": "decision",
+          "description": "Check if customer can continue sledding",
+          "conditions": [
+            {
+              "condition": {
+                "type": "time",
+                "operator": "<",
+                "value": "SessionEndTime - 6"
+              },
+              "nextStepId": "seize-sled-lane",
+              "probability": 1.0
+            },
+            {
+              "nextStepId": "walk-to-tube-return",
+              "probability": 1.0
+            }
+          ]
+        },
+        {
+          "id": "seize-sled-lane",
+          "type": "seize",
+          "resourceName": "SleddingLane"
+        },
+        {
+          "id": "sled-down-hill",
+          "type": "delay",
+          "duration": {
+            "type": "uniform",
+            "parameters": {
+              "min": 0.44,
+              "mode": 0.56
+            },
+            "unit": "minutes"
+          },
+          "description": "Sled 500 ft at Uniform(15-19) mph"
+        },
+        {
+          "id": "release-sled-lane",
+          "type": "release",
+          "resourceName": "SleddingLane"
+        },
+        {
+          "id": "choose-return-method",
+          "type": "decision",
+          "description": "Decide walk-up vs conveyor based on queue",
+          "conditions": [
+            {
+              "condition": {
+                "type": "queue_length",
+                "resourceName": "Conveyor",
+                "operator": ">",
+                "value": 10
+              },
+              "nextStepId": "walk-to-walk-path",
+              "probability": 1.0
+            },
+            {
+              "nextStepId": "walk-to-conveyor",
+              "probability": 0.95
+            },
+            {
+              "nextStepId": "walk-to-walk-path",
+              "probability": 0.05
+            }
+          ]
+        },
+        {
+          "id": "walk-to-conveyor",
+          "type": "delay",
+          "duration": {
+            "type": "constant",
+            "parameters": {
+              "value": 0.1
+            },
+            "unit": "minutes"
+          },
+          "description": "Walk 30 ft to conveyor at 5 mph"
+        },
+        {
+          "id": "seize-conveyor",
+          "type": "seize",
+          "resourceName": "Conveyor"
+        },
+        {
+          "id": "ride-conveyor-up",
+          "type": "delay",
+          "duration": {
+            "type": "constant",
+            "parameters": {
+              "value": 5.68
+            },
+            "unit": "minutes"
+          },
+          "description": "Ride conveyor 500 ft at 1.5 mph = 5.68 min"
+        },
+        {
+          "id": "release-conveyor",
+          "type": "release",
+          "resourceName": "Conveyor"
+        },
+        {
+          "id": "conveyor-to-top",
+          "type": "delay",
+          "duration": {
+            "type": "constant",
+            "parameters": {
+              "value": 0.17
+            },
+            "unit": "minutes"
+          },
+          "description": "Walk 50 ft to top"
+        },
+        {
+          "id": "return-to-sledding-loop",
+          "type": "decision",
+          "conditions": [
+            {
+              "nextStepId": "sledding-loop-start",
+              "probability": 1.0
+            }
+          ]
+        },
+        {
+          "id": "walk-to-walk-path",
+          "type": "delay",
+          "duration": {
+            "type": "constant",
+            "parameters": {
+              "value": 0.067
+            },
+            "unit": "minutes"
+          },
+          "description": "Walk 20 ft to walk-up path"
+        },
+        {
+          "id": "walk-up-hill",
+          "type": "delay",
+          "duration": {
+            "type": "triangular",
+            "parameters": {
+              "min": 10,
+              "mode": 12,
+              "max": 15
+            },
+            "unit": "minutes"
+          },
+          "description": "Walk 500 ft uphill at slower speed"
+        },
+        {
+          "id": "walk-path-to-top",
+          "type": "delay",
+          "duration": {
+            "type": "constant",
+            "parameters": {
+              "value": 0.17
+            },
+            "unit": "minutes"
+          },
+          "description": "Walk 50 ft to top"
+        },
+        {
+          "id": "return-to-loop-from-walk",
+          "type": "decision",
+          "conditions": [
+            {
+              "nextStepId": "sledding-loop-start",
+              "probability": 1.0
+            }
+          ]
+        },
+        {
+          "id": "walk-to-tube-return",
+          "type": "delay",
+          "duration": {
+            "type": "constant",
+            "parameters": {
+              "value": 1.67
+            },
+            "unit": "minutes"
+          },
+          "description": "Walk 500 ft to tube return at 5 mph"
+        },
+        {
+          "id": "return-tube",
+          "type": "delay",
+          "duration": {
+            "type": "constant",
+            "parameters": {
+              "value": 0.25
+            },
+            "unit": "minutes"
+          },
+          "description": "Drop off tube"
+        },
+        {
+          "id": "exit-facility",
+          "type": "process",
+          "description": "Customer exits"
+        }
+      ],
+      "description": "Complete snow tubing customer flow with looping"
+    }
+  ],
+
+  "objectives": [
+    {
+      "name": "TicketBoothWaitTime",
+      "metric": "wait_time",
+      "targetType": "target_value",
+      "targetValue": 15,
+      "resourceName": "TicketBooth",
+      "description": "All customers processed within 15 minutes of arrival"
+    },
+    {
+      "name": "TubePickupWaitTime",
+      "metric": "wait_time",
+      "targetType": "target_value",
+      "targetValue": 20,
+      "resourceName": "TubePickupLane",
+      "description": "All customers get tubes within 20 minutes of session start"
+    },
+    {
+      "name": "SleddingWaitTime",
+      "metric": "wait_time",
+      "targetType": "minimize",
+      "targetValue": 2,
+      "resourceName": "SleddingLane",
+      "description": "Wait less than 2 minutes for sledding lane"
+    }
+  ],
+
+  "experiments": [
+    {
+      "name": "TicketBoothStaffing",
+      "description": "Determine optimal number of ticket agents",
+      "scenario": "optimization",
+      "parameters": [
+        {
+          "name": "TicketBoothCapacity",
+          "type": "resource_capacity",
+          "resourceName": "TicketBooth",
+          "baselineValue": 2,
+          "testValues": [2, 3, 4, 5]
+        }
+      ],
+      "optimizationObjective": "TicketBoothWaitTime",
+      "runLength": 90,
+      "runLengthUnit": "days",
+      "replications": 30
+    },
+    {
+      "name": "SleddingLaneCapacity",
+      "description": "Find number of lanes needed for <2 min wait",
+      "scenario": "optimization",
+      "parameters": [
+        {
+          "name": "SleddingLanes",
+          "type": "resource_capacity",
+          "resourceName": "SleddingLane",
+          "baselineValue": 10,
+          "testValues": [10, 12, 15, 18, 20]
+        }
+      ],
+      "optimizationObjective": "SleddingWaitTime",
+      "runLength": 90,
+      "runLengthUnit": "days",
+      "replications": 30
+    },
+    {
+      "name": "TubePickupLines",
+      "description": "Lines needed for 20 min tube pickup goal",
+      "scenario": "optimization",
+      "parameters": [
+        {
+          "name": "TubePickupCapacity",
+          "type": "resource_capacity",
+          "resourceName": "TubePickupLane",
+          "baselineValue": 5,
+          "testValues": [5, 7, 10, 12, 15]
+        }
+      ],
+      "optimizationObjective": "TubePickupWaitTime",
+      "runLength": 90,
+      "runLengthUnit": "days",
+      "replications": 30
+    }
+  ],
+
+  "assumptions": [
+    {
+      "description": "Customer walking speed in snow is 5 mph (4.4 ft/s)",
+      "category": "other",
+      "rationale": "Typical slow walking speed, adjusted for snow conditions",
+      "affectedElements": ["All walking delays"]
+    },
+    {
+      "description": "Uphill walking is significantly slower (10-15 min for 500 ft)",
+      "category": "other",
+      "rationale": "Walking uphill in snow with tube is physically demanding",
+      "affectedElements": ["walk-up-hill"]
+    },
+    {
+      "description": "Session arrival rates converted to 15-minute windows",
+      "category": "distribution",
+      "rationale": "Customers arrive 15 min before session start",
+      "affectedElements": ["CustomerGroup arrivals"]
+    },
+    {
+      "description": "Customers loop until 6 minutes before session end",
+      "category": "routing",
+      "rationale": "Employees ask customers to leave 6 min before end",
+      "affectedElements": ["sledding-loop-start"]
+    },
+    {
+      "description": "Phone call interruptions modeled as resource failures",
+      "category": "other",
+      "rationale": "Uniform(1-2) hours between calls, PERT(1,2,2.5) min duration",
+      "affectedElements": ["TicketBooth"]
+    }
+  ],
+
+  "missingInformation": [
+    {
+      "category": "process",
+      "severity": "important",
+      "description": "Excel spreadsheet with processing time distributions not available",
+      "suggestedDefault": "Using reasonable estimates based on case study text",
+      "affectedElements": ["TicketBooth", "Walk speeds"]
+    },
+    {
+      "category": "distribution",
+      "severity": "minor",
+      "description": "Exact walking speeds for different terrain not specified",
+      "suggestedDefault": "Assumed 5 mph flat, 2 mph uphill with tube",
+      "affectedElements": ["All walking delays"]
+    }
+  ]
+}

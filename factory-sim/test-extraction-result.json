@@ -1,0 +1,218 @@
+{
+  "success": true,
+  "system": {
+    "systemName": "The Summit Snow Tubing Facility",
+    "systemType": "service",
+    "description": "A recreational snow tubing facility where customers check in, ride tow rope to top, sled down, and optionally repeat or exit",
+    "entities": [
+      {
+        "name": "Customer Groups",
+        "type": "customer",
+        "arrivalPattern": {
+          "type": "poisson",
+          "rate": 20,
+          "rateUnit": "per_hour"
+        },
+        "attributes": [
+          {
+            "name": "groupSize",
+            "type": "number",
+            "distribution": {
+              "type": "triangular",
+              "parameters": {
+                "min": 1,
+                "mode": 2,
+                "max": 6
+              },
+              "unit": "dimensionless"
+            }
+          }
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Ticket Booth",
+        "type": "server",
+        "capacity": 2,
+        "processingTime": {
+          "type": "normal",
+          "parameters": {
+            "mean": 3,
+            "stdDev": 0.8
+          },
+          "unit": "minutes"
+        }
+      },
+      {
+        "name": "Tube Distribution Area",
+        "type": "space",
+        "capacity": 20
+      },
+      {
+        "name": "Tow Rope",
+        "type": "conveyor",
+        "capacity": 8,
+        "speed": 200
+      },
+      {
+        "name": "Sledding Lanes",
+        "type": "path",
+        "capacity": 12
+      }
+    ],
+    "processes": [
+      {
+        "name": "Complete Customer Journey",
+        "entityType": "Customer Groups",
+        "routingLogic": "cyclic",
+        "sequence": [
+          {
+            "id": "arrive",
+            "type": "seize",
+            "resourceName": "Ticket Booth",
+            "description": "Queue for ticket booth"
+          },
+          {
+            "id": "checkin",
+            "type": "delay",
+            "duration": {
+              "type": "normal",
+              "parameters": {
+                "mean": 3,
+                "stdDev": 0.8
+              },
+              "unit": "minutes"
+            },
+            "description": "Check-in and payment"
+          },
+          {
+            "id": "release_booth",
+            "type": "release",
+            "resourceName": "Ticket Booth"
+          },
+          {
+            "id": "walk_to_tube",
+            "type": "delay",
+            "duration": {
+              "type": "uniform",
+              "parameters": {
+                "min": 0.5,
+                "max": 1.5
+              },
+              "unit": "minutes"
+            },
+            "description": "Walk 100 feet to tube distribution area"
+          },
+          {
+            "id": "seize_tube",
+            "type": "seize",
+            "resourceName": "Tube Distribution Area",
+            "description": "Pick up snow tube"
+          },
+          {
+            "id": "release_tube",
+            "type": "release",
+            "resourceName": "Tube Distribution Area"
+          },
+          {
+            "id": "walk_to_rope",
+            "type": "delay",
+            "duration": {
+              "type": "uniform",
+              "parameters": {
+                "min": 0.5,
+                "max": 1.5
+              },
+              "unit": "minutes"
+            },
+            "description": "Walk to tow rope"
+          },
+          {
+            "id": "seize_rope",
+            "type": "seize",
+            "resourceName": "Tow Rope"
+          },
+          {
+            "id": "ride_up",
+            "type": "delay",
+            "duration": {
+              "type": "constant",
+              "parameters": {
+                "value": 4.5
+              },
+              "unit": "minutes"
+            },
+            "description": "Ride tow rope to top of hill"
+          },
+          {
+            "id": "release_rope",
+            "type": "release",
+            "resourceName": "Tow Rope"
+          },
+          {
+            "id": "seize_lane",
+            "type": "seize",
+            "resourceName": "Sledding Lanes"
+          },
+          {
+            "id": "sled_down",
+            "type": "delay",
+            "duration": {
+              "type": "uniform",
+              "parameters": {
+                "min": 2,
+                "max": 3.5
+              },
+              "unit": "minutes"
+            },
+            "description": "Sled down 500 feet at varying speeds"
+          },
+          {
+            "id": "release_lane",
+            "type": "release",
+            "resourceName": "Sledding Lanes"
+          },
+          {
+            "id": "decide_repeat",
+            "type": "decision",
+            "conditions": [
+              {
+                "nextStepId": "walk_to_rope",
+                "probability": 0.75,
+                "description": "Go again (75%)"
+              },
+              {
+                "nextStepId": "exit_facility",
+                "probability": 0.25,
+                "description": "Leave facility (25%)"
+              }
+            ]
+          },
+          {
+            "id": "exit_facility",
+            "type": "process",
+            "description": "Customer exits the facility"
+          }
+        ]
+      }
+    ],
+    "objectives": [
+      {
+        "name": "Minimize Wait Time",
+        "metric": "wait_time",
+        "targetType": "minimize",
+        "targetValue": 5,
+        "description": "Keep average wait time under 5 minutes"
+      }
+    ],
+    "experiments": [],
+    "missingInformation": [],
+    "assumptions": []
+  },
+  "warnings": [],
+  "tokensUsed": {
+    "input": 2381,
+    "output": 1185
+  }
+}

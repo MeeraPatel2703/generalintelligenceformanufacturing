@@ -1,0 +1,422 @@
+/* Experiment Designer Styles */
+
+.experiment-designer {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #0d1117;
+  color: #e6edf3;
+}
+
+.experiment-designer.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #8b949e;
+}
+
+.designer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #30363d;
+}
+
+.designer-header h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #58a6ff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Experiments Section */
+.experiments-section {
+  margin-bottom: 30px;
+}
+
+.experiments-section h3 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #8b949e;
+  text-transform: uppercase;
+}
+
+.experiments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.empty-message {
+  padding: 40px;
+  text-align: center;
+  color: #6e7681;
+  font-style: italic;
+}
+
+/* Experiment Card */
+.experiment-card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.experiment-card:hover {
+  border-color: #58a6ff;
+}
+
+.experiment-card.selected {
+  border-color: #1f6feb;
+  box-shadow: 0 0 0 2px rgba(31, 111, 235, 0.2);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.card-header input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.experiment-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.badge {
+  padding: 4px 10px;
+  background: #1f6feb;
+  border-radius: 12px;
+  font-size: 11px;
+  text-transform: capitalize;
+}
+
+.expand-btn {
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
+.card-body {
+  padding: 0 15px 15px 15px;
+  border-top: 1px solid #21262d;
+}
+
+.experiment-description {
+  margin: 15px 0;
+}
+
+.experiment-description label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: #8b949e;
+  text-transform: uppercase;
+}
+
+.experiment-description textarea {
+  width: 100%;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  color: #e6edf3;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.experiment-description textarea:focus {
+  outline: none;
+  border-color: #58a6ff;
+}
+
+.parameters-list {
+  margin: 15px 0;
+}
+
+.parameters-list h4 {
+  margin: 0 0 10px 0;
+  font-size: 12px;
+  color: #8b949e;
+  text-transform: uppercase;
+}
+
+.parameter-item {
+  padding: 10px;
+  background: #0d1117;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.param-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.param-info strong {
+  font-size: 13px;
+}
+
+.param-type {
+  font-size: 11px;
+  color: #8b949e;
+  padding: 2px 8px;
+  background: #21262d;
+  border-radius: 8px;
+}
+
+.param-values {
+  display: flex;
+  gap: 15px;
+  font-size: 12px;
+  color: #8b949e;
+}
+
+.card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn-edit {
+  padding: 6px 12px;
+  background: #21262d;
+  border: 1px solid #30363d;
+  color: #e6edf3;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-edit:hover {
+  background: #30363d;
+  border-color: #58a6ff;
+}
+
+.btn-delete {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid #da3633;
+  color: #da3633;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-delete:hover {
+  background: #da3633;
+  color: #fff;
+}
+
+/* Modal */
+.add-experiment-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #21262d;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #e6edf3;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+}
+
+.close-btn:hover {
+  color: #e6edf3;
+}
+
+.add-experiment-form {
+  padding: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: #8b949e;
+  text-transform: uppercase;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  color: #e6edf3;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #58a6ff;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+/* Experiment Config */
+.experiment-config {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+}
+
+.experiment-config h3 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #8b949e;
+  text-transform: uppercase;
+}
+
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.config-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.config-item label {
+  font-size: 12px;
+  color: #8b949e;
+  text-transform: uppercase;
+}
+
+.config-item select {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  color: #e6edf3;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.config-item select:focus {
+  outline: none;
+  border-color: #58a6ff;
+}
+
+/* Run Actions */
+.run-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  padding-top: 20px;
+  border-top: 2px solid #30363d;
+}
+
+.btn-primary {
+  padding: 12px 24px;
+  background: #238636;
+  border: none;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #2ea043;
+}
+
+.btn-primary:disabled {
+  background: #21262d;
+  color: #6e7681;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  padding: 12px 24px;
+  background: #21262d;
+  border: 1px solid #30363d;
+  color: #e6edf3;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #30363d;
+  border-color: #58a6ff;
+}
