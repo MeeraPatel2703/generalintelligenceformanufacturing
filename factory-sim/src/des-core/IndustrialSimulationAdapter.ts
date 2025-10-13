@@ -187,11 +187,12 @@ export class IndustrialSimulationAdapter {
       // Schedule arrivals based on pattern type
       // Handle multiple variations of Poisson arrival pattern naming
       const arrivalType = arrivalPattern.type?.toLowerCase().replace(/[_-]/g, '') || '';
+      const arrivalTypeStr = String(arrivalPattern.type || '').toLowerCase().replace(/[-_\s]/g, '');
       const isPoissonType = arrivalType === 'poisson' || 
                            arrivalType === 'nonhomogeneous' || 
                            arrivalType === 'nonhomogeneouspoisson' ||
-                           arrivalPattern.type === 'non-homogeneous_poisson' ||
-                           arrivalPattern.type === 'non_homogeneous_poisson';
+                           arrivalTypeStr.includes('nonhomogeneous') ||
+                           arrivalTypeStr.includes('poisson');
       
       if (isPoissonType) {
         console.log(`[IndustrialAdapter]   Arrival type: ${arrivalPattern.type} → Handling as Poisson`);

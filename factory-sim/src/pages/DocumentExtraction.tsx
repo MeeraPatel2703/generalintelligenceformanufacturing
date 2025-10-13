@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { ExtractedSystem } from '../types/extraction';
-import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { SimpleIndustrialSim } from '../components/SimpleIndustrialSim';
 import { useDESModelStore } from '../store/desModelStore';
@@ -30,7 +29,6 @@ export function DocumentExtraction() {
   const [tokensUsed, setTokensUsed] = useState<{ input: number; output: number } | null>(null);
   const [simulating, setSimulating] = useState(false);
   const [simulationResults, setSimulationResults] = useState<any>(null);
-  const [simulationTime, setSimulationTime] = useState(0);
   const [showLiveView, setShowLiveView] = useState(true);
 
   // DES Model Store
@@ -174,34 +172,7 @@ export function DocumentExtraction() {
     setTokensUsed(null);
     setSimulating(false);
     setSimulationResults(null);
-    setSimulationTime(0);
     setShowLiveView(true);
-  };
-
-  const handleRunSimulation = async () => {
-    if (!extractedSystem || !window.electron) return;
-
-    try {
-      setSimulating(true);
-      setError(null);
-      setSimulationTime(0);
-
-      console.log('[DocumentExtraction] Starting DES simulation...');
-
-      const result = await window.electron.runSimulation(extractedSystem, 100);
-
-      if (!result.success) {
-        throw new Error(result.error || 'Simulation failed');
-      }
-
-      console.log('[DocumentExtraction] Simulation complete:', result.results);
-      setSimulationResults(result.results);
-      setSimulating(false);
-    } catch (err) {
-      console.error('[DocumentExtraction] Simulation error:', err);
-      setError(err instanceof Error ? err.message : 'Simulation failed');
-      setSimulating(false);
-    }
   };
 
   // Update simulation time
