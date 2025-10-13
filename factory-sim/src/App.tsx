@@ -192,15 +192,6 @@ function App() {
       <button onClick={() => { setMode('editable-des'); window.location.hash = '/editable-des'; }} className={`mode-btn ${mode === 'editable-des' ? 'active' : ''}`}>
         DES EDITOR
       </button>
-      <button onClick={() => { setMode('simple-demo'); window.location.hash = ''; }} className={`mode-btn ${mode === 'simple-demo' ? 'active' : ''}`}>
-        DEMO
-      </button>
-      <button onClick={() => { setMode('builder'); window.location.hash = ''; }} className={`mode-btn ${mode === 'builder' ? 'active' : ''}`}>
-        BUILDER
-      </button>
-      <button onClick={() => { setMode('analysis'); window.location.hash = ''; }} className={`mode-btn ${mode === 'analysis' ? 'active' : ''}`}>
-        CSV ANALYSIS
-      </button>
     </div>
   );
 
