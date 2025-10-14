@@ -611,7 +611,7 @@ export class MetricsCollector {
     return totalWIP * 0.5; // Simplified: half of total at any given time
   }
   
-  private calculateTheoretical MaxThroughput(): number {
+  private calculateTheoreticalMaxThroughput(): number {
     // Find the bottleneck resource's theoretical max
     let maxThroughput = Infinity;
     for (const tracker of this.resourceStats.values()) {
