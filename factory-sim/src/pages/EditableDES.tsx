@@ -14,7 +14,7 @@ import { SpecificationEditor } from '../components/editors/SpecificationEditor';
 import { VisualFlowEditor } from '../components/editors/VisualFlowEditor';
 import { CodeEditor } from '../components/editors/CodeEditor';
 import { ExperimentDesigner } from '../components/editors/ExperimentDesigner';
-import './EditableDES.css';
+import '../styles/industrial-theme.css';
 
 type ViewMode = 'spec' | 'visual' | 'code' | 'experiments';
 
@@ -48,6 +48,11 @@ export const EditableDES: React.FC = () => {
     setEditMode(view as any);
   };
 
+  const handleBack = () => {
+    window.location.hash = '';
+    window.location.reload();
+  };
+
   const isDirtyInCurrentView = () => {
     switch (currentView) {
       case 'spec':
@@ -62,100 +67,136 @@ export const EditableDES: React.FC = () => {
   };
 
   return (
-    <div className="editable-des">
+    <div className="industrial-container" style={{ minHeight: '100vh' }}>
+      <div className="blueprint-background"></div>
+      
       {/* Header */}
-      <div className="des-header">
-        <div className="header-left">
-          <button
-            className="back-btn"
-            onClick={() => {
-              window.location.hash = '';
-              window.location.reload();
-            }}
-            title="Back to Document Extraction"
-          >
-            ← Back
-          </button>
-          <h1>EDITABLE DES SYSTEM</h1>
-          {extractedSystem && (
-            <span className="system-badge">{extractedSystem.systemName}</span>
-          )}
+      <div className="industrial-content" style={{ padding: '1.5rem 2rem', borderBottom: '1px solid var(--color-border)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <button
+              onClick={handleBack}
+              className="industrial-button industrial-button--secondary"
+              style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+              title="Back to Document Extraction"
+            >
+              ← BACK
+            </button>
+            <div>
+              <div className="industrial-hero__label">DES EDITOR</div>
+              <h1 className="industrial-hero__title" style={{ fontSize: '1.75rem', marginTop: '0.25rem' }}>
+                {extractedSystem?.systemName || 'EDITABLE DES SYSTEM'}
+              </h1>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            {isDirtyInCurrentView() && (
+              <div className="industrial-status industrial-status--warning">
+                <span className="industrial-status__indicator"></span>
+                UNSAVED CHANGES
+              </div>
+            )}
+            <button
+              className="industrial-button industrial-button--secondary"
+              onClick={() => undo()}
+              disabled={!canUndo()}
+              title="Undo (Ctrl+Z)"
+              style={{ opacity: canUndo() ? 1 : 0.5 }}
+            >
+              ↶ UNDO
+            </button>
+            <button
+              className="industrial-button industrial-button--secondary"
+              onClick={() => redo()}
+              disabled={!canRedo()}
+              title="Redo (Ctrl+Y)"
+              style={{ opacity: canRedo() ? 1 : 0.5 }}
+            >
+              ↷ REDO
+            </button>
+            <button 
+              className="industrial-button industrial-button--primary" 
+              onClick={() => syncAll()}
+            >
+              SYNC ALL
+            </button>
+          </div>
         </div>
 
-        <div className="header-right">
-          {isDirtyInCurrentView() && (
-            <span className="dirty-indicator">● Unsaved changes</span>
-          )}
-          <button
-            className="header-btn"
-            onClick={() => undo()}
-            disabled={!canUndo()}
-            title="Undo (Ctrl+Z)"
-          >
-            ↶ Undo
-          </button>
-          <button
-            className="header-btn"
-            onClick={() => redo()}
-            disabled={!canRedo()}
-            title="Redo (Ctrl+Y)"
-          >
-            ↷ Redo
-          </button>
-          <button className="header-btn" onClick={() => syncAll()}>
-            Sync All
-          </button>
+        {/* View Tabs */}
+        <div style={{ 
+          display: 'flex', 
+          gap: '0.5rem', 
+          marginTop: '1.5rem',
+          borderBottom: '1px solid var(--color-border)'
+        }}>
+          {(['spec', 'visual', 'code', 'experiments'] as ViewMode[]).map(view => {
+            const labels = {
+              spec: 'SPECIFICATION',
+              visual: 'VISUAL FLOW',
+              code: 'CODE',
+              experiments: 'EXPERIMENTS'
+            };
+            const isActive = currentView === view;
+            const dirty = isDirty[view as keyof typeof isDirty];
+
+            return (
+              <button
+                key={view}
+                onClick={() => handleViewChange(view)}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  background: isActive ? 'var(--color-bg-secondary)' : 'transparent',
+                  border: 'none',
+                  borderBottom: isActive ? '2px solid var(--color-primary)' : '2px solid transparent',
+                  color: isActive ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  position: 'relative'
+                }}
+              >
+                {labels[view]}
+                {dirty && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '0.5rem',
+                    right: '0.5rem',
+                    width: '6px',
+                    height: '6px',
+                    background: 'var(--color-warning)',
+                    borderRadius: '50%'
+                  }}></span>
+                )}
+              </button>
+            );
+          })}
         </div>
-      </div>
-
-      {/* View Tabs */}
-      <div className="view-tabs">
-        <button
-          className={`tab ${currentView === 'spec' ? 'active' : ''}`}
-          onClick={() => handleViewChange('spec')}
-        >
-          <span className="tab-label">Specification</span>
-          {isDirty.spec && <span className="dirty-dot">●</span>}
-        </button>
-
-        <button
-          className={`tab ${currentView === 'visual' ? 'active' : ''}`}
-          onClick={() => handleViewChange('visual')}
-        >
-          <span className="tab-label">Visual Flow</span>
-          {isDirty.visual && <span className="dirty-dot">●</span>}
-        </button>
-
-        <button
-          className={`tab ${currentView === 'code' ? 'active' : ''}`}
-          onClick={() => handleViewChange('code')}
-        >
-          <span className="tab-label">Code</span>
-          {isDirty.code && <span className="dirty-dot">●</span>}
-        </button>
-
-        <button
-          className={`tab ${currentView === 'experiments' ? 'active' : ''}`}
-          onClick={() => handleViewChange('experiments')}
-        >
-          <span className="tab-label">Experiments</span>
-        </button>
       </div>
 
       {/* Content Area */}
-      <div className="des-content">
+      <div className="industrial-content" style={{ padding: '2rem', flex: 1 }}>
         {!extractedSystem && (
-          <div className="empty-state">
-            <h2>No System Loaded</h2>
-            <p>
-              Upload a document in the Document Extraction page to generate an
-              editable DES model.
+          <div className="industrial-card" style={{ textAlign: 'center', padding: '4rem 2rem', maxWidth: '600px', margin: '0 auto' }}>
+            <div className="industrial-status industrial-status--idle" style={{ marginBottom: '1.5rem', justifyContent: 'center' }}>
+              <span className="industrial-status__indicator"></span>
+              NO SYSTEM LOADED
+            </div>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', fontFamily: 'var(--font-mono)' }}>
+              No DES Model Available
+            </h2>
+            <p style={{ color: 'var(--color-text-secondary)', marginBottom: '2rem' }}>
+              Upload a document in the AGENTIC DES page to generate an editable DES model,
+              or load an existing system specification.
             </p>
             <button
-              className="btn-primary"
-              onClick={() => (window.location.href = '#/document-extraction')}
+              className="industrial-button industrial-button--primary"
+              onClick={handleBack}
             >
-              Go to Document Extraction
+              GO TO AGENTIC DES
             </button>
           </div>
         )}
@@ -167,39 +208,45 @@ export const EditableDES: React.FC = () => {
       </div>
 
       {/* Footer Status Bar */}
-      <div className="des-footer">
-        <div className="footer-left">
-          <span className="status-item">
-            <span className="label">Mode:</span>
-            <span className="value">{currentView}</span>
-          </span>
-          {extractedSystem && (
-            <>
-              <span className="separator">|</span>
-              <span className="status-item">
-                <span className="label">Entities:</span>
-                <span className="value">{extractedSystem.entities.length}</span>
-              </span>
-              <span className="separator">|</span>
-              <span className="status-item">
-                <span className="label">Resources:</span>
-                <span className="value">{extractedSystem.resources.length}</span>
-              </span>
-              <span className="separator">|</span>
-              <span className="status-item">
-                <span className="label">Processes:</span>
-                <span className="value">{extractedSystem.processes.length}</span>
-              </span>
-            </>
-          )}
-        </div>
+      {extractedSystem && (
+        <div style={{
+          padding: '0.75rem 2rem',
+          borderTop: '1px solid var(--color-border)',
+          background: 'var(--color-bg-secondary)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontFamily: 'var(--font-mono)',
+          fontSize: '0.75rem',
+          color: 'var(--color-text-secondary)'
+        }}>
+          <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+            <span>
+              <span style={{ opacity: 0.6 }}>MODE:</span>{' '}
+              <span style={{ color: 'var(--color-primary)' }}>{currentView.toUpperCase()}</span>
+            </span>
+            <span style={{ opacity: 0.3 }}>|</span>
+            <span>
+              <span style={{ opacity: 0.6 }}>ENTITIES:</span>{' '}
+              <span style={{ color: 'var(--color-text-primary)' }}>{extractedSystem.entities.length}</span>
+            </span>
+            <span style={{ opacity: 0.3 }}>|</span>
+            <span>
+              <span style={{ opacity: 0.6 }}>RESOURCES:</span>{' '}
+              <span style={{ color: 'var(--color-text-primary)' }}>{extractedSystem.resources.length}</span>
+            </span>
+            <span style={{ opacity: 0.3 }}>|</span>
+            <span>
+              <span style={{ opacity: 0.6 }}>PROCESSES:</span>{' '}
+              <span style={{ color: 'var(--color-text-primary)' }}>{extractedSystem.processes.length}</span>
+            </span>
+          </div>
 
-        <div className="footer-right">
-          <span className="status-item">
-            <span className="label">AI + Manual Hybrid</span>
-          </span>
+          <div className="industrial-badge">
+            AI + MANUAL HYBRID
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
