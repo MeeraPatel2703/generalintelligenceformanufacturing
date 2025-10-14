@@ -175,15 +175,6 @@ export function DocumentExtraction() {
     setShowLiveView(true);
   };
 
-  // Update simulation time
-  useEffect(() => {
-    if (!simulating) return;
-    const interval = setInterval(() => {
-      setSimulationTime(prev => prev + 0.1);
-    }, 100);
-    return () => clearInterval(interval);
-  }, [simulating]);
-
   const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;

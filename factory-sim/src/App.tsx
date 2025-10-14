@@ -6,11 +6,9 @@ import { LoadingSpinner } from './components/LoadingSpinner'
 import { AnalysisResults } from './components/AnalysisResults'
 import SimulationRunner from './components/SimulationRunner'
 import SimulationResults from './components/SimulationResults'
-import { VisualBuilder } from './pages/VisualBuilder'
 import { DocumentExtraction } from './pages/DocumentExtraction'
 import { EditableDES } from './pages/EditableDES'
-import { SimpleDESDemo } from './components/SimpleDESDemo'
-// SimulationTest removed - Electron only now
+// SimpleDESDemo, VisualBuilder removed - not in navigation
 import './index.css'
 
 interface CSVData {
@@ -24,7 +22,7 @@ interface CSVData {
 }
 
 function App() {
-  const [mode, setMode] = useState<'analysis' | 'builder' | 'extraction' | 'editable-des' | 'simple-demo'>('simple-demo')
+  const [mode, setMode] = useState<'analysis' | 'builder' | 'extraction' | 'editable-des'>('extraction')
 
   // Check URL hash for routing
   useEffect(() => {
@@ -235,17 +233,6 @@ function App() {
     }
   `;
 
-  // Simple demo mode - MINIMAL WORKING EXAMPLE
-  if (mode === 'simple-demo') {
-    return (
-      <div className="app">
-        <ModeSwitcher />
-        <SimpleDESDemo />
-        <style>{modeSwitcherStyles}</style>
-      </div>
-    );
-  }
-
   // Editable DES mode
   if (mode === 'editable-des') {
     return (
@@ -261,17 +248,6 @@ function App() {
       <div className="app">
         <ModeSwitcher />
         <DocumentExtraction />
-        <style>{modeSwitcherStyles}</style>
-      </div>
-    );
-  }
-
-  // Visual builder mode
-  if (mode === 'builder') {
-    return (
-      <div className="app">
-        <ModeSwitcher />
-        <VisualBuilder />
         <style>{modeSwitcherStyles}</style>
       </div>
     );

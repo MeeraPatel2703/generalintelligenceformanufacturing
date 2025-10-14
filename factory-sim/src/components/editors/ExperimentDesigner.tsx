@@ -10,7 +10,7 @@
 
 import React, { useState } from 'react';
 import { useDESModelStore } from '../../store/desModelStore';
-import type { Experiment, ExperimentParameter } from '../../types/extraction';
+import type { Experiment } from '../../types/extraction';
 import './ExperimentDesigner.css';
 
 export const ExperimentDesigner: React.FC = () => {

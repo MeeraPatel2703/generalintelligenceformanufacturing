@@ -32,7 +32,7 @@ const COLORS = {
   grid: '#2d3748',           // Dark grid lines
 };
 
-export function AnimatedSimulationCanvas({ simulator, isRunning }: Props) {
+export function AnimatedSimulationCanvas({ simulator, isRunning: _isRunning }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [resources, setResources] = useState<VisualResource[]>([]);
   const [entities, setEntities] = useState<VisualEntity[]>([]);
@@ -86,7 +86,6 @@ export function AnimatedSimulationCanvas({ simulator, isRunning }: Props) {
     // Animation loop
     const animate = () => {
       const now = Date.now();
-      const deltaTime = (now - lastUpdateTimeRef.current) / 1000;
       lastUpdateTimeRef.current = now;
 
       // Clear canvas
@@ -571,7 +570,7 @@ function drawEntity(ctx: CanvasRenderingContext2D, entity: VisualEntity): void {
 /**
  * Draw legend explaining colors
  */
-function drawLegend(ctx: CanvasRenderingContext2D, width: number, height: number): void {
+function drawLegend(ctx: CanvasRenderingContext2D, width: number, _height: number): void {
   const legendX = width - 180;
   const legendY = 20;
   const lineHeight = 20;

@@ -10,7 +10,7 @@
 
 import React, { useState } from 'react';
 import { useDESModelStore } from '../../store/desModelStore';
-import type { Entity, Resource, Process, ArrivalPattern, Distribution } from '../../types/extraction';
+import type { Entity, Resource, Process, Distribution } from '../../types/extraction';
 import './SpecificationEditor.css';
 
 export const SpecificationEditor: React.FC = () => {

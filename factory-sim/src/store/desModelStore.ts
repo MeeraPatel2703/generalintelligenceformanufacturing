@@ -254,7 +254,7 @@ function generateFlowEdgesFromSystem(system: ExtractedSystem | null): Edge[] {
 
   // Step 1: Connect entities to first resource (if any resources exist)
   if (system.resources.length > 0) {
-    system.entities.forEach((entity, entityIdx) => {
+    system.entities.forEach((_entity, entityIdx) => {
       // Connect to first resource
       edges.push({
         id: `edge-entity-${entityIdx}-to-resource-0`,
