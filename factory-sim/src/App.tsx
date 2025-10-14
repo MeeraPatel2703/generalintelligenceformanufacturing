@@ -8,7 +8,8 @@ import SimulationRunner from './components/SimulationRunner'
 import SimulationResults from './components/SimulationResults'
 import { DocumentExtraction } from './pages/DocumentExtraction'
 import { EditableDES } from './pages/EditableDES'
-// SimpleDESDemo, VisualBuilder removed - not in navigation
+import { SimpleIndustrialSim } from './components/SimpleIndustrialSim'
+import { useDESModelStore } from './store/desModelStore'
 import './index.css'
 
 interface CSVData {
@@ -22,13 +23,16 @@ interface CSVData {
 }
 
 function App() {
-  const [mode, setMode] = useState<'analysis' | 'builder' | 'extraction' | 'editable-des'>('extraction')
+  const [mode, setMode] = useState<'analysis' | 'builder' | 'extraction' | 'editable-des' | 'live-simulation'>('extraction')
+  const { extractedSystem } = useDESModelStore()
 
   // Check URL hash for routing
   useEffect(() => {
     const hash = window.location.hash.slice(1);
     if (hash === '/editable-des') {
       setMode('editable-des');
+    } else if (hash === '/live-simulation') {
+      setMode('live-simulation');
     } else if (hash === '') {
       setMode('extraction');
     }
@@ -40,6 +44,8 @@ function App() {
       const hash = window.location.hash.slice(1);
       if (hash === '/editable-des') {
         setMode('editable-des');
+      } else if (hash === '/live-simulation') {
+        setMode('live-simulation');
       } else if (hash === '') {
         setMode('extraction');
       }
@@ -190,6 +196,11 @@ function App() {
       <button onClick={() => { setMode('editable-des'); window.location.hash = '/editable-des'; }} className={`mode-btn ${mode === 'editable-des' ? 'active' : ''}`}>
         DES EDITOR
       </button>
+      {extractedSystem && (
+        <button onClick={() => { setMode('live-simulation'); window.location.hash = '/live-simulation'; }} className={`mode-btn ${mode === 'live-simulation' ? 'active' : ''}`}>
+          ▶️ LIVE SIMULATION
+        </button>
+      )}
     </div>
   );
 
@@ -238,6 +249,57 @@ function App() {
     return (
       <div className="app">
         <EditableDES />
+      </div>
+    );
+  }
+
+  // Live Simulation mode
+  if (mode === 'live-simulation') {
+    if (!extractedSystem) {
+      return (
+        <div className="app">
+          <ModeSwitcher />
+          <style>{modeSwitcherStyles}</style>
+          <div style={{ 
+            padding: '40px', 
+            textAlign: 'center', 
+            backgroundColor: '#1a1a1a', 
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <div>
+              <div style={{ fontSize: '48px', marginBottom: '20px' }}>⚠️</div>
+              <h2 style={{ color: '#f1f5f9', marginBottom: '20px' }}>No System Loaded</h2>
+              <p style={{ color: '#a0a0a0', marginBottom: '20px' }}>
+                Please extract a system first by uploading a PDF document.
+              </p>
+              <button 
+                onClick={() => { setMode('extraction'); window.location.hash = ''; }}
+                style={{
+                  padding: '12px 24px',
+                  fontSize: '16px',
+                  backgroundColor: '#10b981',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '5px',
+                  cursor: 'pointer'
+                }}
+              >
+                Go to Document Extraction
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="app">
+        <ModeSwitcher />
+        <SimpleIndustrialSim system={extractedSystem} />
+        <style>{modeSwitcherStyles}</style>
       </div>
     );
   }
