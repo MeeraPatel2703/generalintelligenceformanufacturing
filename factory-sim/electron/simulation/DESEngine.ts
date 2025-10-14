@@ -67,7 +67,7 @@ export class Distributions {
 
   pert(min: number, mode: number, max: number): number {
     // PERT distribution uses Beta distribution
-    const mean = (min + 4 * mode + max) / 6
+    // Mean formula: (min + 4 * mode + max) / 6
     const range = max - min
 
     // Simplified PERT using triangular approximation with shape parameter

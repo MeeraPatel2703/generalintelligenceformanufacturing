@@ -154,7 +154,7 @@ export class SimulationEngine {
   /**
    * Handle ARRIVAL event
    */
-  private handleArrival(event: SimulationEvent): void {
+  private handleArrival(_event: SimulationEvent): void {
     // Create new part
     const partId = `part_${this.partIdCounter++}`;
     const part = new Part(partId, this.currentTime);
@@ -287,7 +287,7 @@ export class SimulationEngine {
   /**
    * Handle END_SIMULATION event
    */
-  private handleEndSimulation(event: SimulationEvent): void {
+  private handleEndSimulation(_event: SimulationEvent): void {
     console.log(`[DES Engine] Simulation ended at time ${this.currentTime}`);
 
     // Finalize all machine statistics

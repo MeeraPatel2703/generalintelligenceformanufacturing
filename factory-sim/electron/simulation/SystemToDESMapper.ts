@@ -3,7 +3,7 @@
  */
 
 import { DESEngine, EventType, SimEvent, Entity, ObservationStatistic } from './DESEngine.js'
-import type { ExtractedSystem, Entity as EntityDef, Resource as ResourceDef, Process as ProcessDef } from '../../src/types/extraction.js'
+import type { ExtractedSystem, Entity as EntityDef, Process as ProcessDef } from '../../src/types/extraction.js'
 
 /**
  * Generic DES Model created from extracted system
@@ -123,7 +123,7 @@ export class GenericDESModel extends DESEngine {
     console.log(`[GenericDESModel] Scheduled deterministic arrivals for ${entityType.name}`)
   }
 
-  protected processEvent(event: SimEvent): void {
+  protected override processEvent(event: SimEvent): void {
     switch (event.type) {
       case EventType.ARRIVAL:
         this.handleArrival(event)
@@ -189,7 +189,7 @@ export class GenericDESModel extends DESEngine {
       resource.seize(entity, this.clock)
 
       // Get processing time
-      const processingTime = this.getProcessingTime(process, resourceName)
+      const processingTime = this.getProcessingTime(_process, resourceName)
 
       console.log(`[${this.clock.toFixed(2)}] Entity ${entity.id} seized ${resourceName}, processing for ${processingTime.toFixed(2)} min`)
 

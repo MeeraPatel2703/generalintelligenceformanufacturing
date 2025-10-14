@@ -63,7 +63,6 @@ function buildPrompt(csvContent: string): string {
   const MAX_ROWS = 200;
   const lines = csvContent.split('\n');
   const csvPreview = lines.slice(0, Math.min(MAX_ROWS, lines.length)).join('\n');
-  const columnNames = lines[0] || '';
   const totalRows = lines.length - 1;
 
   return `You are analyzing factory DCS/SCADA data to extract simulation parameters. You MUST return ONLY valid JSON.

@@ -122,7 +122,7 @@ export class ConstantDistribution extends Distribution {
     if (value < 0) throw new Error('Value must be non-negative');
   }
 
-  sample(rng: RandomNumberGenerator): number {
+  sample(_rng: RandomNumberGenerator): number {
     return this.value;
   }
 

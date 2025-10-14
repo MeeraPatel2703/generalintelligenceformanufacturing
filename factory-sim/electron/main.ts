@@ -57,11 +57,11 @@ if (process.env.OPENAI_API_KEY) {
 
 // Mock cache service since better-sqlite3 is disabled
 const cacheService = {
-  get: (key: string): null | { analysis: string; timestamp: number } => null,
-  set: (key: string, value: any) => {},
+  get: (_key: string): null | { analysis: string; timestamp: number } => null,
+  set: (_key: string, _value: any) => {},
   clear: () => {},
-  hashCSV: (content: string) => 'mock-hash',
-  clearOld: (days: number) => {},
+  hashCSV: (_content: string) => 'mock-hash',
+  clearOld: (_days: number) => {},
   close: () => {}
 }
 
@@ -96,11 +96,11 @@ function createWindow() {
   })
 
   // Listen for preload errors
-  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+  mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription) => {
     console.error('[Main] Page failed to load:', errorCode, errorDescription)
   })
 
-  mainWindow.webContents.on('preload-error', (event, preloadPath, error) => {
+  mainWindow.webContents.on('preload-error', (_event, preloadPath, error) => {
     console.error('[Main] Preload script error:', preloadPath, error)
   })
 

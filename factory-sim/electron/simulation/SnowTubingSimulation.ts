@@ -4,7 +4,7 @@
  * Complete implementation of The Summit at Snoqualmie snow tubing facility
  */
 
-import { DESEngine, EventType, SimEvent, Entity, Resource } from './DESEngine.js'
+import { DESEngine, EventType, SimEvent, Entity } from './DESEngine.js'
 
 // ============================================================================
 // CONFIGURATION
@@ -222,7 +222,7 @@ export class SnowTubingSimulation extends DESEngine {
   // EVENT PROCESSING
   // ============================================================================
 
-  protected processEvent(event: SimEvent): void {
+  protected override processEvent(event: SimEvent): void {
     switch (event.type) {
       case EventType.ARRIVAL:
         this.handleArrival(event)
@@ -517,11 +517,11 @@ export class SnowTubingSimulation extends DESEngine {
     this.entities.delete(entity.id)
   }
 
-  private handleSessionStart(event: SimEvent): void {
+  private handleSessionStart(_event: SimEvent): void {
     console.log(`[${this.clock.toFixed(2)}] Session starting`)
   }
 
-  private handleSessionEnd(event: SimEvent): void {
+  private handleSessionEnd(_event: SimEvent): void {
     console.log(`[${this.clock.toFixed(2)}] Session ending`)
   }
 

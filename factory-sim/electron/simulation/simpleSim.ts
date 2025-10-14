@@ -91,7 +91,7 @@ export function runSimpleMonteCarlo(
     cycleTimeResults.push(totalCycleTime);
 
     // Sample utilization variations for each machine
-    analysis.machines.forEach((m, idx) => {
+    analysis.machines.forEach((m, _idx) => {
       // Utilization varies slightly around the mean
       const utilSample = Math.max(0, Math.min(100,
         sampleNormal(m.utilization.avg, 3) // ±3% variation
