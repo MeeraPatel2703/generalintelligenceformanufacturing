@@ -14,6 +14,7 @@ import type { Entity, Resource, Process, Distribution } from '../../types/extrac
 import { IndustrialSimulationAdapter } from '../../des-core/IndustrialSimulationAdapter';
 import { ReportGenerator } from '../../core/reports/ReportGenerator';
 import { HTMLExporter } from '../../core/reports/HTMLExporter';
+import { ResultsDashboard } from '../dashboards/ResultsDashboard';
 import './SpecificationEditor.css';
 import '../../styles/industrial-theme.css';
 
@@ -244,8 +245,46 @@ export const SpecificationEditor: React.FC = () => {
         </button>
       </div>
 
-      {/* SIMULATION RESULTS MODAL - SIMIO-GRADE COMPREHENSIVE METRICS */}
+      {/* ENHANCED SIMULATION RESULTS DASHBOARD */}
       {showResults && simulationResult && (
+        <ResultsDashboard
+          metrics={simulationResult}
+          onClose={() => setShowResults(false)}
+          onExportReport={async () => {
+            try {
+              console.log('[SpecEditor] Generating professional HTML report...');
+              
+              // Generate comprehensive report
+              const reportGenerator = new ReportGenerator();
+              const report = await reportGenerator.generateReport(simulationResult, 'executive');
+              
+              // Export to HTML
+              const htmlExporter = new HTMLExporter();
+              const htmlContent = htmlExporter.exportToHTML(report);
+              
+              // Download HTML file
+              const blob = new Blob([htmlContent], { type: 'text/html' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `${extractedSystem?.systemName || 'simulation'}_report_${Date.now()}.html`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+              
+              console.log('[SpecEditor] Report exported successfully!');
+              alert('✅ Report downloaded successfully! Open it in your browser and use Print → Save as PDF for a PDF version.');
+            } catch (error) {
+              console.error('[SpecEditor] Report export failed:', error);
+              alert('Failed to export report: ' + (error instanceof Error ? error.message : 'Unknown error'));
+            }
+          }}
+        />
+      )}
+      
+      {/* OLD MODAL REMOVED - REPLACED WITH ResultsDashboard */}
+      {false && showResults && simulationResult && (
         <div className="industrial-modal-overlay" onClick={() => setShowResults(false)}>
           <div className="industrial-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '1200px' }}>
             <div className="industrial-modal__header">
