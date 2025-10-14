@@ -12,6 +12,8 @@ import React, { useState } from 'react';
 import { useDESModelStore } from '../../store/desModelStore';
 import type { Entity, Resource, Process, Distribution } from '../../types/extraction';
 import { IndustrialSimulationAdapter } from '../../des-core/IndustrialSimulationAdapter';
+import { ReportGenerator } from '../../core/reports/ReportGenerator';
+import { HTMLExporter } from '../../core/reports/HTMLExporter';
 import './SpecificationEditor.css';
 import '../../styles/industrial-theme.css';
 
@@ -510,9 +512,35 @@ export const SpecificationEditor: React.FC = () => {
               <div style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid var(--color-border)', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
                 <button 
                   className="industrial-button industrial-button--secondary"
-                  onClick={() => {
-                    console.log('Exporting report...', simulationResult);
-                    alert('Report export functionality coming in Phase 2!');
+                  onClick={async () => {
+                    try {
+                      console.log('[SpecEditor] Generating professional HTML report...');
+                      
+                      // Generate comprehensive report
+                      const reportGenerator = new ReportGenerator();
+                      const report = await reportGenerator.generateReport(simulationResult, 'executive');
+                      
+                      // Export to HTML
+                      const htmlExporter = new HTMLExporter();
+                      const htmlContent = htmlExporter.exportToHTML(report);
+                      
+                      // Download HTML file
+                      const blob = new Blob([htmlContent], { type: 'text/html' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `${extractedSystem?.systemName || 'simulation'}_report_${Date.now()}.html`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                      
+                      console.log('[SpecEditor] Report exported successfully!');
+                      alert('✅ Report downloaded successfully! Open it in your browser and use Print → Save as PDF for a PDF version.');
+                    } catch (error) {
+                      console.error('[SpecEditor] Report export failed:', error);
+                      alert('Failed to export report: ' + (error instanceof Error ? error.message : 'Unknown error'));
+                    }
                   }}
                 >
                   📄 EXPORT REPORT
