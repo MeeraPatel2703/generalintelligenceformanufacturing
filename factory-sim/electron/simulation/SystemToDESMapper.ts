@@ -10,7 +10,6 @@ import type { ExtractedSystem, Entity as EntityDef, Process as ProcessDef } from
  */
 export class GenericDESModel extends DESEngine {
   private system: ExtractedSystem
-  private entityId = 0
 
   constructor(system: ExtractedSystem, seed?: number) {
     super(seed)
@@ -189,12 +188,11 @@ export class GenericDESModel extends DESEngine {
       resource.seize(entity, this.clock)
 
       // Get processing time
-      const processingTime = this.getProcessingTime(_process, resourceName)
+      const processingTime = this.getProcessingTime(resourceName)
 
       console.log(`[${this.clock.toFixed(2)}] Entity ${entity.id} seized ${resourceName}, processing for ${processingTime.toFixed(2)} min`)
 
       this.scheduleEvent(processingTime, EventType.END_SERVICE, entity, resource, {
-        process,
         resourceName
       })
     } else {
@@ -203,7 +201,7 @@ export class GenericDESModel extends DESEngine {
     }
   }
 
-  private getProcessingTime(process: ProcessDef, resourceName: string): number {
+  private getProcessingTime(resourceName: string): number {
     // Find the resource definition
     const resourceDef = this.system.resources?.find(r => r.name === resourceName)
 

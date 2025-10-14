@@ -418,7 +418,7 @@ export class SnowTubingSimulation extends DESEngine {
     }
   }
 
-  private handleStartService(event: SimEvent): void {
+  private handleStartService(_event: SimEvent): void {
     // Service started - already handled in try* methods
   }
 
@@ -525,7 +525,7 @@ export class SnowTubingSimulation extends DESEngine {
     console.log(`[${this.clock.toFixed(2)}] Session ending`)
   }
 
-  private handleSessionWarning(event: SimEvent): void {
+  private handleSessionWarning(_event: SimEvent): void {
     console.log(`[${this.clock.toFixed(2)}] Session warning - customers should return tubes`)
   }
 
