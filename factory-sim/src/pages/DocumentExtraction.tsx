@@ -216,13 +216,13 @@ export function DocumentExtraction() {
                 Upload your operational system description and let AI extract the complete model.
               </p>
               
-              <button
+          <button
                 className="industrial-button"
-                onClick={handleUploadDocument}
-                disabled={loading}
-              >
+            onClick={handleUploadDocument}
+            disabled={loading}
+          >
                 {loading ? 'Loading...' : 'Upload Document'}
-              </button>
+          </button>
               
               <p style={{ 
                 marginTop: '1rem', 
@@ -232,23 +232,23 @@ export function DocumentExtraction() {
                 letterSpacing: '0.05em'
               }}>
                 PDF • DOCX • TXT • MARKDOWN
-              </p>
-            </div>
-          )}
+          </p>
+        </div>
+      )}
 
           {/* Error Display */}
-          {error && (
+      {error && (
             <div className="industrial-card" style={{ borderColor: '#f87171' }}>
               <div className="industrial-status industrial-status--error" style={{ marginBottom: '1rem' }}>
                 <span className="industrial-status__indicator"></span>
                 ERROR
               </div>
               <p style={{ color: 'var(--color-text-secondary)' }}>{error}</p>
-            </div>
-          )}
+        </div>
+      )}
 
           {/* Warnings Display */}
-          {warnings.length > 0 && (
+      {warnings.length > 0 && (
             <div className="industrial-card" style={{ borderColor: '#fbbf24' }}>
               <div className="industrial-status industrial-status--warning" style={{ marginBottom: '1rem' }}>
                 <span className="industrial-status__indicator"></span>
@@ -261,15 +261,15 @@ export function DocumentExtraction() {
                 fontFamily: 'var(--font-mono)',
                 fontSize: '0.875rem'
               }}>
-                {warnings.map((warning, index) => (
+            {warnings.map((warning, index) => (
                   <li key={index} style={{ marginBottom: '0.5rem' }}>→ {warning}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+            ))}
+          </ul>
+        </div>
+      )}
 
           {/* Document Information Section */}
-          {documentData && !extractedSystem && !extracting && (
+      {documentData && !extractedSystem && !extracting && (
             <>
               <div className="industrial-card">
                 <div className="industrial-card__header">
@@ -283,43 +283,43 @@ export function DocumentExtraction() {
                     <span className="industrial-info-value" style={{ fontSize: '1rem' }}>
                       {documentData.fileName}
                     </span>
-                  </div>
+              </div>
                   <div className="industrial-info-item">
                     <span className="industrial-info-label">Size</span>
                     <span className="industrial-info-value">
                       {formatFileSize(documentData.fileSize)}
                     </span>
-                  </div>
+              </div>
                   <div className="industrial-info-item">
                     <span className="industrial-info-label">Type</span>
                     <span className="industrial-info-value">
                       {documentData.fileType.toUpperCase()}
                     </span>
-                  </div>
-                  {documentData.metadata?.pageCount && (
+              </div>
+              {documentData.metadata?.pageCount && (
                     <div className="industrial-info-item">
                       <span className="industrial-info-label">Pages</span>
                       <span className="industrial-info-value">
                         {documentData.metadata.pageCount}
                       </span>
-                    </div>
-                  )}
+                </div>
+              )}
                   <div className="industrial-info-item">
                     <span className="industrial-info-label">Characters</span>
                     <span className="industrial-info-value">
                       {documentData.content.length.toLocaleString()}
                     </span>
-                  </div>
-                  {documentData.metadata?.wordCount && (
+              </div>
+              {documentData.metadata?.wordCount && (
                     <div className="industrial-info-item">
                       <span className="industrial-info-label">Words</span>
                       <span className="industrial-info-value">
                         {documentData.metadata.wordCount.toLocaleString()}
                       </span>
-                    </div>
-                  )}
                 </div>
-              </div>
+              )}
+            </div>
+          </div>
 
               <div className="industrial-card">
                 <div className="industrial-card__header">
@@ -330,28 +330,28 @@ export function DocumentExtraction() {
                 </div>
                 <pre className="industrial-code-block">
 {documentData.content.substring(0, 1000)}{documentData.content.length > 1000 ? '...' : ''}
-                </pre>
-                {documentData.content.length > 1000 && (
+            </pre>
+              {documentData.content.length > 1000 && (
                   <div className="industrial-status industrial-status--success" style={{ marginTop: '1rem' }}>
                     <span className="industrial-status__indicator"></span>
                     FULL DOCUMENT WILL BE PROCESSED
                   </div>
                 )}
-              </div>
+          </div>
 
               <div className="industrial-action-bar">
                 <button className="industrial-button" onClick={handleExtractSystem}>
-                  Extract DES Model
-                </button>
+              Extract DES Model
+            </button>
                 <button className="industrial-button industrial-button--secondary" onClick={handleReset}>
-                  Upload Different Document
-                </button>
-              </div>
+              Upload Different Document
+            </button>
+          </div>
             </>
-          )}
+      )}
 
           {/* Extracting State */}
-          {extracting && (
+      {extracting && (
             <div className="industrial-loader">
               <div className="industrial-loader__spinner"></div>
               <span className="industrial-loader__text">
@@ -364,55 +364,55 @@ export function DocumentExtraction() {
           )}
 
           {/* Extraction Results */}
-          {extractedSystem && !extracting && !error && (
+      {extractedSystem && !extracting && !error && (
             <>
               {/* Success Header */}
               <div className="industrial-card">
                 <div className="industrial-status industrial-status--success" style={{ marginBottom: '1rem' }}>
                   <span className="industrial-status__indicator"></span>
                   EXTRACTION COMPLETE
-                </div>
+              </div>
                 
                 {tokensUsed && (
                   <p className="text-mono text-tertiary" style={{ fontSize: '0.75rem', marginTop: '0.5rem' }}>
                     {tokensUsed.input.toLocaleString()} INPUT TOKENS • {tokensUsed.output.toLocaleString()} OUTPUT TOKENS
                   </p>
-                )}
+            )}
 
                 <div className="industrial-action-bar">
-                  <button
+              <button
                     className="industrial-button"
-                    onClick={() => {
-                      setDESSystem(extractedSystem);
-                      window.location.hash = '/editable-des';
+                onClick={() => {
+                  setDESSystem(extractedSystem);
+                      window.location.hash = '/simulation';
                     }}
                   >
-                    Edit Model in DES Editor
-                  </button>
+                    ▶️ View Simulation
+              </button>
                   <button className="industrial-button industrial-button--secondary" onClick={handleExportSystem}>
-                    Export JSON
-                  </button>
-                  {simulationResults && (
-                    <button
+                Export JSON
+              </button>
+              {simulationResults && (
+                <button
                       className="industrial-button industrial-button--secondary"
-                      onClick={() => setShowLiveView(!showLiveView)}
-                    >
-                      {showLiveView ? 'Show Results' : 'Show Simulation'}
-                    </button>
-                  )}
+                  onClick={() => setShowLiveView(!showLiveView)}
+                >
+                  {showLiveView ? 'Show Results' : 'Show Simulation'}
+                </button>
+              )}
                   <button className="industrial-button industrial-button--secondary" onClick={handleReset}>
-                    Upload New Document
-                  </button>
-                </div>
-              </div>
+                Upload New Document
+              </button>
+            </div>
+          </div>
 
               {/* System Overview */}
               <div className="industrial-card">
                 <div className="industrial-card__header">
                   <h2 className="industrial-card__title">System Overview</h2>
                   <span className="industrial-card__meta">{extractedSystem.systemType?.toUpperCase()}</span>
-                </div>
-                
+            </div>
+
                 <div className="industrial-info-grid">
                   <div className="industrial-info-item">
                     <span className="industrial-info-label">System Name</span>
@@ -454,7 +454,7 @@ export function DocumentExtraction() {
         
         {/* Close industrial-container */}
       </div>
-        
+
       {/* Simulation Component - Rendered outside blueprint container for clean display */}
       {extractedSystem && showLiveView && (
         <SimpleIndustrialSim system={extractedSystem} />
