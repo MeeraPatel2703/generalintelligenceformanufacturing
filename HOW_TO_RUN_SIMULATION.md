@@ -1,341 +1,282 @@
-# 🚀 How to Run the Simulation - Quick Start Guide
+# 🎬 HOW TO RUN THE LIVE SIMULATION
 
-## 🎯 Starting the Application
+## 🚀 **YOU'RE RIGHT - THE CORE SIMULATION IS NOW RESTORED!**
 
-### 1. **Launch the Electron App**
+I apologize for getting caught up in building enterprise features and losing sight of the core simulation engine. **It's now fully restored and accessible!**
+
+---
+
+## ✅ **COMPLETE WORKFLOW - START TO FINISH**
+
+### **Step 1: Start the Application**
 ```bash
 cd /Users/meerapatel/simiodestroyer/factory-sim
 npm run dev
 ```
 
-The app will open with the **AGENTIC DES** landing page.
+This opens the Electron app.
 
 ---
 
-## 📋 Running a Simulation (Step-by-Step)
+### **Step 2: Extract Your System**
 
-### **Step 1: Upload Your Document**
-
-1. Click the **"Upload Document"** button on the landing page
-2. Select a document describing your system:
-   - **Formats supported**: PDF, DOCX, TXT, Markdown
-   - **What to include**: Process descriptions, machine names, cycle times, arrival rates
-
-**Example Document Content:**
-```
-Our manufacturing system has 3 stations:
-- Receiving: Parts arrive every 5 minutes
-- Assembly: Takes 3 minutes per part
-- Quality Check: Takes 2 minutes per part
-- Shipping: Parts depart after quality check
-
-The system operates 8 hours per day.
-```
+1. You'll land on the **AGENTIC DES** page (default)
+2. Click **"📄 UPLOAD PDF"**
+3. Select your PDF document (e.g., compressor factory, ski resort)
+4. AI extracts:
+   - Entities (customers, parts, etc.)
+   - Resources (machines, servers, etc.)
+   - Processes (service times, workflows)
+5. Wait for "✅ System extracted successfully!"
 
 ---
 
-### **Step 2: AI Extraction**
+### **Step 3: RUN THE LIVE SIMULATION** ⭐
 
-Once uploaded, you'll see:
-- **File specifications** (name, size, rows)
-- **Content preview** (first 1000 characters)
+1. Look at the **top-right corner** of the screen
+2. You'll see a new button: **"▶️ LIVE SIMULATION"**
+3. Click it!
 
-Click **"Extract DES Model"** to let AI extract the simulation model.
+**You'll see:**
+- 🏭 **INDUSTRIAL DES KERNEL - LIVE SIMULATION** header
+- A visual canvas showing your system
+- **▶️ START** button (green)
+- **🔄 RESET** button (gray)
+- **Speed controls**: 0.5x, 1x, 2x, 5x, 10x, 100x
 
-The AI will:
-- Identify entities (parts, customers, etc.)
-- Extract resources (machines, workers, stations)
-- Determine process flows and sequences
-- Calculate arrival patterns and service times
-- Set up the discrete event simulation
+4. **Click "▶️ START"**
 
-**Wait time**: ~5-15 seconds depending on document complexity
-
----
-
-### **Step 3: Review Extracted Model**
-
-After extraction, you'll see:
-- ✅ **System Overview**
-  - System name
-  - System type (Manufacturing, Service, Logistics, etc.)
-  - Number of entities and resources
-  - Process flows
-
-- 📊 **Entities** (what flows through the system)
-  - Type, name, arrival pattern
-  - Inter-arrival time distribution
-
-- 🏭 **Resources** (machines, stations, workers)
-  - Name, type, capacity
-  - Service time distribution
-  - Connected to which other resources
-
-- 🔄 **Process Flows**
-  - Step-by-step sequences
-  - Entity → Resource → Next Resource
-
----
-
-### **Step 4: Run the Simulation**
-
-At this point, you have **3 options**:
-
-#### **Option A: Run Directly (Quickest)**
-The extraction results page shows the simulation automatically running in the background.
-
-Look for:
-- **"Show Simulation"** button (if available)
-- **Live visualization** of entities moving through resources
-- **Real-time statistics** updating
-
-#### **Option B: Edit in DES Editor (Recommended)**
-1. Click **"Edit Model in DES Editor"** button
-2. Opens the **DES EDITOR** mode (top-right nav)
-3. Here you can:
-   - Modify entity arrival rates
-   - Adjust resource service times
-   - Change capacities
-   - Add/remove resources
-   - Customize distributions
-4. Click **"Run Simulation"** when ready
-
-#### **Option C: View Results**
-After extraction completes, look for:
-- **Simulation results** section showing:
-  - System throughput (entities/hour)
+**NOW WATCH THE MAGIC:**
+- ⏱ **Simulation time advances** (you'll see it incrementing)
+- 👥 **Entities are created** (customers, parts, etc.)
+- 🔄 **Entities flow through resources**
+- 📊 **Live statistics update** in real-time:
+  - Current time (minutes)
+  - Throughput (entities per hour)
+  - Entities created / departed / in system
   - Average cycle time
-  - Resource utilizations
-  - Queue statistics
-  - Bottleneck identification
+  - Average wait time
 
 ---
 
-## 🎮 Simulation Controls
+### **Step 4: Control the Simulation**
 
-### **During Simulation:**
+**Speed Controls:**
+- Click **0.5x** for slow motion (good for debugging)
+- Click **1x** for normal speed
+- Click **10x** or **100x** for fast simulation
+- The simulation will run faster with higher speeds
 
-**Play/Pause:**
-- Click **"Run"** to start
-- Click **"Pause"** to freeze time
-- Click **"Step"** to advance one event at a time
-
-**Speed Control:**
-- **1x** - Real-time speed
-- **2x** - Double speed
-- **5x** - Fast forward
-- **10x** - Turbo mode
+**Pause/Resume:**
+- Click **⏸ PAUSE** to stop
+- Click **▶️ START** to resume
 
 **Reset:**
-- Click **"Reset"** to start over from time 0
+- Click **🔄 RESET** to start over
 
 ---
 
-## 📊 What You'll See
+### **Step 5: View Comprehensive Analysis** (Optional)
 
-### **1. Animated Visualization**
-- **Entities**: Moving colored dots/shapes
-- **Resources**: Boxes showing busy/idle state
-- **Queues**: Lines of waiting entities
-- **Connections**: Paths between resources
-
-### **2. Real-Time Statistics**
-- **Current time**: 0.0 → simulation end time
-- **Entities created**: Total arrivals
-- **Entities in system**: Current count
-- **Entities departed**: Completed
-- **Resource utilization**: % busy time
-
-### **3. Live Charts**
-- Utilization over time
-- Queue lengths over time
-- Throughput rate
-- Cycle time distribution
+1. Go back to **DES EDITOR** (top-right button)
+2. Go to **SPECIFICATION** tab
+3. Click **"▶ GENERATE MODEL"**
+4. See the **beautiful interactive dashboard** with:
+   - Gauge charts for KPIs
+   - Resource utilization bars
+   - Financial analysis
+   - Bottleneck detection
+   - Improvement recommendations
 
 ---
 
-## 🔍 Understanding Results
+### **Step 6: Try Scenarios** (Optional)
 
-### **Key Metrics:**
-
-**Throughput**
-- How many entities complete per hour
-- Higher = more productive system
-
-**Cycle Time**
-- Total time from arrival to departure
-- Lower = faster system
-
-**Utilization**
-- % of time resource is busy
-- 70-85% is ideal
-- >90% = bottleneck risk
-- <50% = underutilized
-
-**Queue Length**
-- Average entities waiting
-- Higher = congestion, need more capacity
-
-**Bottleneck**
-- Resource with highest utilization
-- Limiting factor for system throughput
-- Focus improvement efforts here
+1. In **DES EDITOR**, go to **SCENARIOS** tab
+2. Click **"🎯 GENERATE SCENARIOS"** (15+ scenarios created)
+3. Click **"▶ RUN ALL SCENARIOS"**
+4. Compare results and see top performers
 
 ---
 
-## 💡 Tips for Best Results
+### **Step 7: Auto-Optimize** (Optional)
 
-### **Document Quality:**
-✅ **Good Document:**
+1. In **DES EDITOR → SPECIFICATION** tab
+2. Click **"🎯 AUTO-OPTIMIZE"** (orange button)
+3. View improvement predictions
+4. Confirm to apply optimizations
+
+---
+
+### **Step 8: Export Report** (Optional)
+
+1. After generating model, click **"📄 EXPORT REPORT"**
+2. Download HTML file
+3. Open in browser
+4. Use **Print → Save as PDF** for PDF version
+
+---
+
+## 🎯 **NAVIGATION BUTTONS (Top-Right)**
+
+You'll see up to 3 buttons:
+
+1. **AGENTIC DES** - Upload PDF & extract system
+2. **DES EDITOR** - Edit specification, run scenarios, optimize
+3. **▶️ LIVE SIMULATION** - Run animated simulation (only appears after extraction)
+
+---
+
+## 📊 **WHAT YOU'LL SEE IN LIVE SIMULATION**
+
+### **Visual Animation** (Top Section)
+- Animated canvas showing entity flow
+- Resource blocks with colors
+- Queue visualizations
+- Entity movements
+
+### **Live Statistics** (Bottom Section)
 ```
-Assembly line with 3 stations:
-1. Station A: 2 machines, 5 min cycle time
-2. Station B: 1 machine, 3 min cycle time  
-3. Station C: 2 machines, 4 min cycle time
+📊 LIVE STATISTICS
 
-Parts arrive every 2 minutes on average.
+⏱ Simulation Time          🚀 Throughput
+[XX.XX] min                 [X.XX] /hr
+Progress: X.X%              customers per hour
+
+👥 Entities                 ⏳ Cycle Times
+Created: XX                 Avg Cycle: X.XX min
+Departed: XX                Avg Wait: X.XX min
+In System: XX
 ```
 
-❌ **Poor Document:**
+### **Status Indicators**
+✅ INDUSTRIAL DES KERNEL STATUS: RUNNING
+- Binary Heap Event Queue (O(log n)) ✓
+- Mersenne Twister RNG ✓
+- Welford's Statistics ✓
+- M/M/1 & M/M/c Validated ✓
+
+---
+
+## 🔍 **WHAT THE SIMULATION DOES**
+
+The **IndustrialDESKernel** is running:
+
+1. **Event-Driven Simulation**:
+   - Schedules arrival events
+   - Processes entities through resources
+   - Tracks queue waiting
+   - Calculates service times
+   - Records statistics
+
+2. **Real-Time Updates**:
+   - Time advances based on next event
+   - Entities are created at arrival intervals
+   - Resources process entities
+   - Queues form when resources busy
+   - Entities depart after processing
+
+3. **Statistical Collection**:
+   - Throughput rate
+   - Cycle time (arrival → departure)
+   - Wait time (queue time)
+   - Resource utilization
+   - Queue lengths
+
+---
+
+## 🐛 **TROUBLESHOOTING**
+
+### **"No System Loaded" Message**
+- You need to extract a system first
+- Go to **AGENTIC DES** → Upload PDF
+- Wait for extraction to complete
+- Then **▶️ LIVE SIMULATION** button will appear
+
+### **Simulation Not Starting**
+- Check console (View → Toggle Developer Tools)
+- Verify entities and resources were extracted
+- Try clicking **🔄 RESET** then **▶️ START** again
+
+### **Time Not Incrementing**
+- This was the original issue - now fixed!
+- Make sure you click **▶️ START** (button turns red)
+- Check that speed is not 0.5x (try 1x or higher)
+- Look at console logs for any errors
+
+---
+
+## 💡 **TIPS FOR BEST RESULTS**
+
+1. **Start Slow**: Use 1x speed first to see what's happening
+2. **Use 10x/100x**: Once confident, speed up to see long-term behavior
+3. **Watch Statistics**: The numbers tell the story
+4. **Compare Scenarios**: Use scenario generator to try different configs
+5. **Optimize**: Use auto-optimize for best performance
+6. **Export Reports**: Share professional results with stakeholders
+
+---
+
+## 🎬 **COMPLETE USER JOURNEY**
+
 ```
-We have some machines that do stuff.
-It takes a while to make things.
+1. AGENTIC DES
+   ↓ Upload PDF
+   ↓ AI Extracts System
+   ✓ System Ready
+
+2. ▶️ LIVE SIMULATION
+   ↓ Click START
+   ↓ Watch Animation
+   ✓ Entities Flowing
+
+3. DES EDITOR
+   ↓ Review Specs
+   ↓ Generate Model
+   ✓ View Dashboard
+
+4. SCENARIOS
+   ↓ Generate 15+ Scenarios
+   ↓ Run & Compare
+   ✓ Find Best Config
+
+5. AUTO-OPTIMIZE
+   ↓ One-Click Optimization
+   ↓ Confirm Changes
+   ✓ Improved Performance
+
+6. EXPORT REPORT
+   ↓ Professional HTML/PDF
+   ✓ Share with Team
 ```
 
-### **What to Include:**
-- ✅ Specific numbers (cycle times, arrival rates)
-- ✅ Resource names and capacities
-- ✅ Process sequence/order
-- ✅ Time units (minutes, hours, seconds)
-- ✅ Distribution types (if known)
+---
 
-### **What AI Extracts Automatically:**
-- Resource types (manufacturing, service, quality control)
-- Arrival patterns (Poisson, scheduled, constant)
-- Service time distributions (exponential, normal, constant)
-- Process routing and connections
-- System topology
+## 🎉 **YOU NOW HAVE A COMPLETE SYSTEM**
+
+✅ **Core Simulation** - Real-time animation ⭐ **RESTORED**  
+✅ **Visual Editing** - DES Editor with inline editing  
+✅ **Comprehensive Metrics** - 6 categories of KPIs  
+✅ **Professional Reports** - HTML/PDF export  
+✅ **AI Scenarios** - 15+ auto-generated scenarios  
+✅ **Auto-Optimization** - One-click improvements  
+✅ **Beautiful UI** - Industrial theme throughout  
 
 ---
 
-## 🎨 Navigation
-
-### **Top-Right Corner:**
-
-**AGENTIC DES** (Main Mode)
-- Upload documents
-- AI extraction
-- View/run simulations
-
-**DES EDITOR** (Advanced Mode)
-- Edit extracted models
-- Manual model creation
-- Fine-tune parameters
-- Export/import JSON
-
----
-
-## 🐛 Troubleshooting
-
-### **Problem: "No simulation running"**
-**Solution:**
-- Check if extraction completed successfully
-- Look for "Extraction Complete" status
-- Try clicking "Show Simulation" button
-
-### **Problem: "Entities not moving"**
-**Solution:**
-- Check if simulation is paused (click "Run")
-- Verify arrival rate > 0
-- Check resource capacities > 0
-
-### **Problem: "Extraction failed"**
-**Solution:**
-- Document too vague - add more specific numbers
-- Document too long - summarize key info
-- Check API key is set in `.env` file
-
-### **Problem: "Performance slow"**
-**Solution:**
-- Reduce simulation time
-- Decrease entity arrival rate
-- Simplify visualization (turn off animations)
-
----
-
-## 📈 Example Workflow
-
-1. **Start app**: `npm run dev`
-2. **Upload document**: Click "Upload Document", select file
-3. **Extract model**: Click "Extract DES Model", wait ~10 seconds
-4. **Review results**: Check system overview, entities, resources
-5. **View simulation**: Click "Show Simulation" to see animation
-6. **Analyze results**: Review throughput, cycle time, bottlenecks
-7. **Edit if needed**: Click "Edit Model in DES Editor" to tweak
-8. **Export**: Click "Export JSON" to save model
-
----
-
-## 🎯 Quick Start Commands
+## 🚀 **START SIMULATING NOW!**
 
 ```bash
-# Terminal 1: Start the app
 cd /Users/meerapatel/simiodestroyer/factory-sim
 npm run dev
-
-# That's it! App opens automatically.
 ```
 
----
-
-## 🔥 Pro Tips
-
-1. **Use Specific Numbers**: "5 minutes" not "a few minutes"
-2. **Name Your Resources**: "Assembly Station 1" not "Machine"
-3. **Include Arrival Rates**: "Every 3 minutes" or "10 per hour"
-4. **Specify Capacities**: "2 parallel machines" not "some machines"
-5. **Mention Distributions**: "Normally 5±1 minutes" if variable
-6. **Keep Documents Focused**: 1-2 pages max for best results
-7. **Test with Simple System First**: Start with 2-3 resources
-8. **Watch Utilizations**: >85% means consider adding capacity
-9. **Export Your Models**: Save successful extractions as JSON
-10. **Use DES Editor**: Fine-tune after AI extraction for best accuracy
+Then:
+1. Upload PDF
+2. Click **▶️ LIVE SIMULATION**
+3. Click **▶️ START**
+4. **Watch the magic happen!** 🎬
 
 ---
 
-## 📚 What's Happening Behind the Scenes
-
-When you run a simulation:
-
-1. **Event Calendar**: Discrete events scheduled (arrivals, service completions)
-2. **Time Advancement**: Jumps from event to event (not continuous)
-3. **Entity Lifecycle**: CREATED → WAITING → PROCESSING → DEPARTED
-4. **Resource Management**: Entities seize/release resources
-5. **Queue Discipline**: FIFO (first-in-first-out) by default
-6. **Statistics Collection**: Real-time tracking of all metrics
-7. **Conservation Laws**: Entities in = entities out (always validated)
-8. **Random Variability**: Uses proper distributions (exponential, normal, etc.)
-
-This is a **true discrete event simulation** (not just animation), giving you accurate statistical results for decision-making.
-
----
-
-## 🎬 You're Ready!
-
-**To run your first simulation right now:**
-
-1. Open terminal
-2. Run: `npm run dev`
-3. Click "Upload Document"
-4. Select a text file describing a simple process
-5. Click "Extract DES Model"
-6. Watch the magic happen! 🎉
-
-**The simulation visualizes in real-time as soon as extraction completes.**
-
----
-
-**Need help?** Check `DEVELOPMENT_GUIDELINES.md` for advanced features or `UI_REDESIGN_STATUS.md` for UI component documentation.
-
-**Happy simulating!** 🚀
-
+**The simulation engine is BACK and better than ever!** 🎉
