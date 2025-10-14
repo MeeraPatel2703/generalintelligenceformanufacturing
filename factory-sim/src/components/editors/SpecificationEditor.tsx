@@ -15,6 +15,7 @@ import { IndustrialSimulationAdapter } from '../../des-core/IndustrialSimulation
 import { ReportGenerator } from '../../core/reports/ReportGenerator';
 import { HTMLExporter } from '../../core/reports/HTMLExporter';
 import { ResultsDashboard } from '../dashboards/ResultsDashboard';
+import { OptimizationEngine } from '../../core/optimization/OptimizationEngine';
 import './SpecificationEditor.css';
 import '../../styles/industrial-theme.css';
 
@@ -37,6 +38,7 @@ export const SpecificationEditor: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [simulationResult, setSimulationResult] = useState<any>(null);
   const [showResults, setShowResults] = useState(false);
+  const [isOptimizing, setIsOptimizing] = useState(false);
 
   if (!extractedSystem) {
     return (
@@ -80,6 +82,53 @@ export const SpecificationEditor: React.FC = () => {
   const handleApproveAll = () => {
     console.log('[SpecEditor] Approving all specifications');
     alert('Specification approved! All changes saved.');
+  };
+
+  const handleAutoOptimize = async () => {
+    if (!extractedSystem) return;
+    
+    setIsOptimizing(true);
+    try {
+      console.log('[SpecEditor] Auto-optimizing system configuration...');
+      
+      const optimizer = new OptimizationEngine();
+      const result = await optimizer.quickOptimize(extractedSystem, 'balanced');
+      
+      console.log('[SpecEditor] Optimization complete:', result.improvements);
+      
+      // Show improvements
+      const improvementMessage = `
+🎯 OPTIMIZATION COMPLETE!
+
+IMPROVEMENTS:
+✓ Throughput: ${result.improvements.throughputChange > 0 ? '+' : ''}${result.improvements.throughputChange.toFixed(1)}%
+✓ Cost: ${result.improvements.costChange > 0 ? '+' : ''}${result.improvements.costChange.toFixed(1)}%
+✓ Cycle Time: ${result.improvements.cycleTimeChange > 0 ? '+' : ''}${result.improvements.cycleTimeChange.toFixed(1)}%
+
+CHANGES MADE:
+${result.changes.map((c, i) => `${i+1}. ${c.impact}`).join('\n')}
+
+Iterations: ${result.iterations}
+Converged: ${result.converged ? 'Yes' : 'No'}
+
+Would you like to apply these optimizations?
+      `.trim();
+      
+      const apply = confirm(improvementMessage);
+      
+      if (apply) {
+        // Update system with optimized configuration
+        // In a real app, this would update the Zustand store
+        console.log('[SpecEditor] Applying optimized configuration...');
+        alert('✅ Optimized configuration would be applied here!\n\n(Integration with store pending)');
+      }
+      
+    } catch (error) {
+      console.error('[SpecEditor] Optimization failed:', error);
+      alert('Failed to optimize: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    } finally {
+      setIsOptimizing(false);
+    }
   };
 
   return (
@@ -235,6 +284,17 @@ export const SpecificationEditor: React.FC = () => {
           onClick={handleApproveAll}
         >
           ✓ APPROVE ALL
+        </button>
+        <button 
+          className="industrial-button industrial-button--accent"
+          onClick={handleAutoOptimize}
+          disabled={isOptimizing}
+          style={{
+            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+            borderColor: '#f59e0b'
+          }}
+        >
+          {isOptimizing ? '⟳ OPTIMIZING...' : '🎯 AUTO-OPTIMIZE'}
         </button>
         <button 
           className="industrial-button industrial-button--primary"
