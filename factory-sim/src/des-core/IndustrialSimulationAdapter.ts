@@ -858,6 +858,24 @@ export class IndustrialSimulationAdapter {
   }
 
   /**
+   * Run simulation to completion
+   * Used for batch runs, scenario analysis, and report generation
+   */
+  run(endTime: number): void {
+    console.log(`[IndustrialAdapter] Running simulation to time ${endTime}...`);
+    
+    this.maxStepTime = endTime;
+    
+    // Run kernel directly to end time
+    this.kernel.run(endTime, 0);
+    
+    // Update adapter time
+    this.currentStepTime = this.kernel.getCurrentTime();
+    
+    console.log(`[IndustrialAdapter] ✓ Simulation complete at time ${this.currentStepTime.toFixed(2)}`);
+  }
+
+  /**
    * Step simulation forward
    * Runs simulation in small increments for smooth animation
    * BUG FIX: Only increment currentStepTime if kernel actually has events to process

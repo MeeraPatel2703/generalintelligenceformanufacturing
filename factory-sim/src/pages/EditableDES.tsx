@@ -14,9 +14,10 @@ import { SpecificationEditor } from '../components/editors/SpecificationEditor';
 import { VisualFlowEditor } from '../components/editors/VisualFlowEditor';
 import { CodeEditor } from '../components/editors/CodeEditor';
 import { ExperimentDesigner } from '../components/editors/ExperimentDesigner';
+import { ScenarioManager } from '../components/editors/ScenarioManager';
 import '../styles/industrial-theme.css';
 
-type ViewMode = 'spec' | 'visual' | 'code' | 'experiments';
+type ViewMode = 'spec' | 'visual' | 'code' | 'experiments' | 'scenarios';
 
 export const EditableDES: React.FC = () => {
   const {
@@ -131,11 +132,12 @@ export const EditableDES: React.FC = () => {
           marginTop: '1.5rem',
           borderBottom: '1px solid var(--color-border)'
         }}>
-          {(['spec', 'visual', 'code', 'experiments'] as ViewMode[]).map(view => {
+          {(['spec', 'visual', 'code', 'scenarios', 'experiments'] as ViewMode[]).map(view => {
             const labels = {
               spec: 'SPECIFICATION',
               visual: 'VISUAL FLOW',
               code: 'CODE',
+              scenarios: 'SCENARIOS',
               experiments: 'EXPERIMENTS'
             };
             const isActive = currentView === view;
@@ -204,6 +206,7 @@ export const EditableDES: React.FC = () => {
         {extractedSystem && currentView === 'spec' && <SpecificationEditor />}
         {extractedSystem && currentView === 'visual' && <VisualFlowEditor />}
         {extractedSystem && currentView === 'code' && <CodeEditor />}
+        {extractedSystem && currentView === 'scenarios' && <ScenarioManager />}
         {extractedSystem && currentView === 'experiments' && <ExperimentDesigner />}
       </div>
 
