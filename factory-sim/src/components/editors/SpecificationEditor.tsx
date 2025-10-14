@@ -52,7 +52,7 @@ export const SpecificationEditor: React.FC = () => {
     
     setIsGenerating(true);
     try {
-      console.log('[SpecEditor] Generating DES model from specification...');
+      console.log('[SpecEditor] Generating SIMIO-GRADE DES model from specification...');
       
       // Create simulator with the current specification
       const simulator = new IndustrialSimulationAdapter(extractedSystem);
@@ -60,11 +60,11 @@ export const SpecificationEditor: React.FC = () => {
       // Run simulation for 100 time units
       simulator.run(100);
       
-      // Get statistics
-      const stats = simulator.getStatistics();
+      // ✨ Get COMPREHENSIVE SIMIO-GRADE METRICS (all 6 categories!)
+      const comprehensiveMetrics = simulator.getComprehensiveMetrics();
       
-      console.log('[SpecEditor] Simulation complete:', stats);
-      setSimulationResult(stats);
+      console.log('[SpecEditor] Simulation complete with comprehensive metrics:', comprehensiveMetrics);
+      setSimulationResult(comprehensiveMetrics);
       setShowResults(true);
     } catch (error) {
       console.error('[SpecEditor] Generation failed:', error);
@@ -242,12 +242,12 @@ export const SpecificationEditor: React.FC = () => {
         </button>
       </div>
 
-      {/* SIMULATION RESULTS MODAL */}
+      {/* SIMULATION RESULTS MODAL - SIMIO-GRADE COMPREHENSIVE METRICS */}
       {showResults && simulationResult && (
         <div className="industrial-modal-overlay" onClick={() => setShowResults(false)}>
-          <div className="industrial-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="industrial-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '1200px' }}>
             <div className="industrial-modal__header">
-              <h2>SIMULATION RESULTS</h2>
+              <h2>COMPREHENSIVE SIMULATION RESULTS</h2>
               <button 
                 className="industrial-button industrial-button--secondary"
                 onClick={() => setShowResults(false)}
@@ -259,53 +259,69 @@ export const SpecificationEditor: React.FC = () => {
             <div className="industrial-modal__content">
               <div className="industrial-status industrial-status--success" style={{ marginBottom: '1.5rem' }}>
                 <span className="industrial-status__indicator"></span>
-                MODEL GENERATED SUCCESSFULLY
+                SIMIO-GRADE MODEL GENERATED & ANALYZED
               </div>
 
-              <div className="industrial-metrics-grid" style={{ marginTop: '1.5rem' }}>
+              {/* ========== THROUGHPUT METRICS ========== */}
+              <h3 style={{ 
+                marginTop: '1.5rem', 
+                marginBottom: '1rem',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '1rem',
+                color: 'var(--color-text-primary)',
+                borderBottom: '1px solid var(--color-border)',
+                paddingBottom: '0.5rem'
+              }}>
+                📊 THROUGHPUT PERFORMANCE
+              </h3>
+              
+              <div className="industrial-metrics-grid">
                 <div className="industrial-metric">
-                  <div className="industrial-metric__label">SIMULATION TIME</div>
+                  <div className="industrial-metric__label">ENTITIES PROCESSED</div>
                   <div className="industrial-metric__value">
-                    {simulationResult.simTime?.toFixed(2) || 'N/A'}
-                  </div>
-                  <div className="industrial-metric__unit">time units</div>
-                </div>
-
-                <div className="industrial-metric">
-                  <div className="industrial-metric__label">ENTITIES CREATED</div>
-                  <div className="industrial-metric__value">
-                    {simulationResult.entitiesCreated || 0}
+                    {simulationResult.throughput?.totalEntitiesProcessed || 0}
                   </div>
                   <div className="industrial-metric__unit">total</div>
                 </div>
 
                 <div className="industrial-metric">
-                  <div className="industrial-metric__label">EVENTS PROCESSED</div>
+                  <div className="industrial-metric__label">THROUGHPUT RATE</div>
                   <div className="industrial-metric__value">
-                    {simulationResult.eventCount || 0}
+                    {simulationResult.throughput?.entitiesPerHour?.toFixed(1) || '0'}
                   </div>
-                  <div className="industrial-metric__unit">events</div>
+                  <div className="industrial-metric__unit">per hour</div>
                 </div>
 
                 <div className="industrial-metric">
-                  <div className="industrial-metric__label">ENTITIES COMPLETED</div>
+                  <div className="industrial-metric__label">AVG CYCLE TIME</div>
                   <div className="industrial-metric__value">
-                    {simulationResult.entitiesCompleted || 0}
+                    {simulationResult.throughput?.averageCycleTime?.toFixed(2) || '0'}
                   </div>
-                  <div className="industrial-metric__unit">total</div>
+                  <div className="industrial-metric__unit">minutes</div>
+                </div>
+
+                <div className="industrial-metric">
+                  <div className="industrial-metric__label">EFFICIENCY</div>
+                  <div className="industrial-metric__value">
+                    {simulationResult.throughput?.throughputEfficiency?.toFixed(1) || '0'}
+                  </div>
+                  <div className="industrial-metric__unit">%</div>
                 </div>
               </div>
 
-              {simulationResult.resourceStats && Object.keys(simulationResult.resourceStats).length > 0 && (
+              {/* ========== RESOURCE UTILIZATION ========== */}
+              {simulationResult.resources && simulationResult.resources.length > 0 && (
                 <>
                   <h3 style={{ 
                     marginTop: '2rem', 
                     marginBottom: '1rem',
                     fontFamily: 'var(--font-mono)',
                     fontSize: '1rem',
-                    color: 'var(--color-text-primary)'
+                    color: 'var(--color-text-primary)',
+                    borderBottom: '1px solid var(--color-border)',
+                    paddingBottom: '0.5rem'
                   }}>
-                    RESOURCE UTILIZATION
+                    ⚙️ RESOURCE UTILIZATION & OEE
                   </h3>
                   
                   <div className="industrial-table-container">
@@ -314,27 +330,36 @@ export const SpecificationEditor: React.FC = () => {
                         <tr>
                           <th>RESOURCE</th>
                           <th>UTILIZATION</th>
+                          <th>OEE</th>
                           <th>ENTITIES SERVED</th>
                           <th>AVG QUEUE</th>
+                          <th>MAX QUEUE</th>
+                          <th>COST/ENTITY</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {Object.entries(simulationResult.resourceStats).map(([name, stats]: [string, any]) => (
-                          <tr key={name}>
-                            <td>{name}</td>
+                        {simulationResult.resources.map((resource: any) => (
+                          <tr key={resource.resourceId}>
+                            <td style={{ fontWeight: 600 }}>{resource.resourceName}</td>
                             <td>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <div className="industrial-progress">
                                   <div 
                                     className="industrial-progress__bar" 
-                                    style={{ width: `${(stats.utilization || 0) * 100}%` }}
+                                    style={{ 
+                                      width: `${(resource.utilization || 0) * 100}%`,
+                                      backgroundColor: resource.utilization > 0.85 ? '#ef4444' : resource.utilization > 0.7 ? '#f59e0b' : '#22c55e'
+                                    }}
                                   ></div>
                                 </div>
-                                <span>{((stats.utilization || 0) * 100).toFixed(1)}%</span>
+                                <span>{((resource.utilization || 0) * 100).toFixed(1)}%</span>
                               </div>
                             </td>
-                            <td>{stats.entitiesServed || 0}</td>
-                            <td>{stats.avgQueueLength?.toFixed(2) || '0.00'}</td>
+                            <td>{((resource.oee || 0) * 100).toFixed(1)}%</td>
+                            <td>{resource.entitiesServed || 0}</td>
+                            <td>{resource.averageQueueLength?.toFixed(1) || '0'}</td>
+                            <td>{resource.maxQueueLength || 0}</td>
+                            <td>${resource.costPerEntity?.toFixed(2) || '0'}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -343,7 +368,155 @@ export const SpecificationEditor: React.FC = () => {
                 </>
               )}
 
-              <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+              {/* ========== FINANCIAL METRICS ========== */}
+              {simulationResult.financial && (
+                <>
+                  <h3 style={{ 
+                    marginTop: '2rem', 
+                    marginBottom: '1rem',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '1rem',
+                    color: 'var(--color-text-primary)',
+                    borderBottom: '1px solid var(--color-border)',
+                    paddingBottom: '0.5rem'
+                  }}>
+                    💰 FINANCIAL PERFORMANCE
+                  </h3>
+                  
+                  <div className="industrial-metrics-grid">
+                    <div className="industrial-metric">
+                      <div className="industrial-metric__label">TOTAL REVENUE</div>
+                      <div className="industrial-metric__value">
+                        ${simulationResult.financial.totalRevenue?.toFixed(2) || '0'}
+                      </div>
+                      <div className="industrial-metric__unit">USD</div>
+                    </div>
+
+                    <div className="industrial-metric">
+                      <div className="industrial-metric__label">TOTAL COST</div>
+                      <div className="industrial-metric__value">
+                        ${simulationResult.financial.totalOperatingCost?.toFixed(2) || '0'}
+                      </div>
+                      <div className="industrial-metric__unit">USD</div>
+                    </div>
+
+                    <div className="industrial-metric">
+                      <div className="industrial-metric__label">PROFIT MARGIN</div>
+                      <div className="industrial-metric__value">
+                        {simulationResult.financial.profitMargin?.toFixed(1) || '0'}
+                      </div>
+                      <div className="industrial-metric__unit">%</div>
+                    </div>
+
+                    <div className="industrial-metric">
+                      <div className="industrial-metric__label">ROI</div>
+                      <div className="industrial-metric__value">
+                        {simulationResult.financial.roi?.toFixed(1) || '0'}
+                      </div>
+                      <div className="industrial-metric__unit">%</div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* ========== BOTTLENECK ANALYSIS ========== */}
+              {simulationResult.advanced?.bottlenecks && simulationResult.advanced.bottlenecks.length > 0 && (
+                <>
+                  <h3 style={{ 
+                    marginTop: '2rem', 
+                    marginBottom: '1rem',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '1rem',
+                    color: 'var(--color-text-primary)',
+                    borderBottom: '1px solid var(--color-border)',
+                    paddingBottom: '0.5rem'
+                  }}>
+                    🔴 BOTTLENECK ANALYSIS
+                  </h3>
+                  
+                  {simulationResult.advanced.bottlenecks.map((bottleneck: any, idx: number) => (
+                    <div key={idx} className="industrial-card" style={{ marginBottom: '1rem', padding: '1rem', borderLeft: `4px solid ${bottleneck.severity > 70 ? '#ef4444' : bottleneck.severity > 40 ? '#f59e0b' : '#22c55e'}` }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <h4 style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: '0.875rem' }}>
+                          {bottleneck.resourceName}
+                        </h4>
+                        <span className="industrial-badge" style={{ 
+                          backgroundColor: bottleneck.severity > 70 ? '#ef4444' : bottleneck.severity > 40 ? '#f59e0b' : '#22c55e'
+                        }}>
+                          SEVERITY: {bottleneck.severity.toFixed(0)}%
+                        </span>
+                      </div>
+                      <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', margin: '0.5rem 0' }}>
+                        {bottleneck.impact}
+                      </p>
+                      {bottleneck.recommendations && bottleneck.recommendations.length > 0 && (
+                        <div style={{ marginTop: '0.75rem' }}>
+                          <strong style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>RECOMMENDATIONS:</strong>
+                          <ul style={{ margin: '0.5rem 0 0 1.5rem', padding: 0, fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+                            {bottleneck.recommendations.map((rec: string, i: number) => (
+                              <li key={i}>{rec}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {/* ========== IMPROVEMENT OPPORTUNITIES ========== */}
+              {simulationResult.advanced?.improvementPotential && simulationResult.advanced.improvementPotential.length > 0 && (
+                <>
+                  <h3 style={{ 
+                    marginTop: '2rem', 
+                    marginBottom: '1rem',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '1rem',
+                    color: 'var(--color-text-primary)',
+                    borderBottom: '1px solid var(--color-border)',
+                    paddingBottom: '0.5rem'
+                  }}>
+                    💡 IMPROVEMENT OPPORTUNITIES
+                  </h3>
+                  
+                  <div style={{ display: 'grid', gap: '1rem' }}>
+                    {simulationResult.advanced.improvementPotential.slice(0, 3).map((opp: any, idx: number) => (
+                      <div key={idx} className="industrial-card" style={{ padding: '1rem', borderLeft: '4px solid var(--color-primary)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <div style={{ flex: 1 }}>
+                            <h4 style={{ margin: 0, fontFamily: 'var(--font-mono)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                              {opp.area}
+                            </h4>
+                            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', margin: 0 }}>
+                              {opp.description}
+                            </p>
+                          </div>
+                          <div style={{ marginLeft: '1rem', textAlign: 'right' }}>
+                            <div style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--color-primary)' }}>
+                              +{opp.estimatedImpact.toFixed(1)}%
+                            </div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+                              {opp.difficulty} difficulty
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* ========== ACTIONS ========== */}
+              <div style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid var(--color-border)', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                <button 
+                  className="industrial-button industrial-button--secondary"
+                  onClick={() => {
+                    console.log('Exporting report...', simulationResult);
+                    alert('Report export functionality coming in Phase 2!');
+                  }}
+                >
+                  📄 EXPORT REPORT
+                </button>
                 <button 
                   className="industrial-button industrial-button--primary"
                   onClick={() => setShowResults(false)}
