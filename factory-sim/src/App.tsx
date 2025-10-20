@@ -9,6 +9,7 @@ import SimulationResults from './components/SimulationResults'
 import { DocumentExtraction } from './pages/DocumentExtraction'
 import { IntegratedSimulation } from './pages/IntegratedSimulation'
 import { useDESModelStore } from './store/desModelStore'
+import { FloatingChatbotButton } from './components/FloatingChatbotButton'
 import './index.css'
 
 interface CSVData {
@@ -23,6 +24,7 @@ interface CSVData {
 
 function App() {
   const [mode, setMode] = useState<'analysis' | 'builder' | 'extraction' | 'simulation'>('extraction')
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false)
   const { extractedSystem } = useDESModelStore()
 
   // Check URL hash for routing
@@ -185,15 +187,15 @@ function App() {
   // Mode switcher component - SIMPLIFIED!
   const ModeSwitcher = () => (
     <div className="mode-switcher">
-      <button 
-        onClick={() => { setMode('extraction'); window.location.hash = ''; }} 
+      <button
+        onClick={() => { setMode('extraction'); window.location.hash = ''; }}
         className={`mode-btn ${mode === 'extraction' ? 'active' : ''}`}
       >
         📄 UPLOAD
       </button>
       {extractedSystem && (
-        <button 
-          onClick={() => { setMode('simulation'); window.location.hash = '/simulation'; }} 
+        <button
+          onClick={() => { setMode('simulation'); window.location.hash = '/simulation'; }}
           className={`mode-btn ${mode === 'simulation' ? 'active' : ''}`}
         >
           ▶️ SIMULATION
@@ -447,6 +449,13 @@ function App() {
             )}
           </>
         )}
+
+        {/* Floating Chatbot Button - Always Visible */}
+        <FloatingChatbotButton
+          onClick={() => setIsChatbotOpen(!isChatbotOpen)}
+          isOpen={isChatbotOpen}
+          hasNewMessages={false}
+        />
       </div>
     </div>
   )

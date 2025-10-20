@@ -53,7 +53,7 @@ function MachineCard({ machine }: { machine: MachineAnalysis }) {
         <div className="detail-row">
           <span className="label">Cycle Time:</span>
           <span className="value">
-            {machine.cycle_time.mean.toFixed(1)} ± {machine.cycle_time.std_dev.toFixed(1)} {machine.cycle_time.unit}
+            {machine.cycle_time.mean.toFixed(1)} ± {machine.cycle_time.std_dev?.toFixed(1) ?? '0'} {machine.cycle_time.unit}
           </span>
         </div>
 
@@ -107,6 +107,10 @@ function FlowDiagram({ flowSequence }: { flowSequence: string[] }) {
 function BottleneckAlert({ analysis }: { analysis: FactoryAnalysis }) {
   const getSeverityClass = (severity: string) => {
     return `severity-${severity}`
+  }
+
+  if (!analysis.bottleneck) {
+    return null;
   }
 
   return (
@@ -195,7 +199,7 @@ export function AnalysisResults({
         </h3>
       </div>
 
-      <FlowDiagram flowSequence={analysis.flow_sequence} />
+      {analysis.flow_sequence && <FlowDiagram flowSequence={analysis.flow_sequence} />}
 
       <BottleneckAlert analysis={analysis} />
 

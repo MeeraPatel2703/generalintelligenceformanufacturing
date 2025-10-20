@@ -46,6 +46,12 @@ export interface SystemExtractionResult {
   error?: string
 }
 
+export interface ComprehensiveSimulationResult {
+  success: boolean
+  results?: any // ComprehensiveSimulationResults
+  error?: string
+}
+
 export interface ElectronAPI {
   openFileDialog: () => Promise<FileDialogResult>
   openDocumentDialog: () => Promise<FileDialogResult>
@@ -60,6 +66,14 @@ export interface ElectronAPI {
   parseDocument: (filePath: string) => Promise<DocumentParseResult & { success: boolean }>
   extractSystem: (documentContent: string, documentType: 'pdf' | 'word' | 'text') => Promise<SystemExtractionResult>
   getDocumentInfo: (filePath: string) => Promise<DocumentInfo>
+
+  // Comprehensive simulation with advanced analysis
+  runComprehensiveSimulation: (extractedSystemOrAnalysis: any, numReplications?: number) => Promise<ComprehensiveSimulationResult>
+
+  // Chatbot API
+  chatbot: {
+    sendMessage: (request: any) => Promise<any>
+  }
 }
 
 // Create the API object
@@ -98,6 +112,18 @@ const electronAPI = {
   },
   getDocumentInfo: (filePath: string): Promise<DocumentInfo> => {
     return ipcRenderer.invoke('document:info', filePath)
+  },
+
+  // Comprehensive simulation with advanced analysis
+  runComprehensiveSimulation: (extractedSystemOrAnalysis: any, numReplications: number = 100): Promise<ComprehensiveSimulationResult> => {
+    return ipcRenderer.invoke('run-comprehensive-simulation', extractedSystemOrAnalysis, numReplications)
+  },
+
+  // Chatbot API
+  chatbot: {
+    sendMessage: (request: any): Promise<any> => {
+      return ipcRenderer.invoke('chatbot:sendMessage', request)
+    }
   }
 } as ElectronAPI
 

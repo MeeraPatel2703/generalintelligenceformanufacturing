@@ -144,7 +144,7 @@ export class GenericDESModel extends DESEngine {
     entity.setAttribute('arrivalTime', this.clock)
     entity.setAttribute('entityType', entityType)
 
-    console.log(`[${this.clock.toFixed(2)}] ${entityType.name} ${entity.id} arrived`)
+    // Disabled for performance: console.log(`[${this.clock.toFixed(2)}] ${entityType.name} ${entity.id} arrived`)
 
     // Find the first process for this entity
     const process = this.findFirstProcess(entityType)
@@ -152,7 +152,7 @@ export class GenericDESModel extends DESEngine {
     if (process) {
       this.startProcess(entity, process)
     } else {
-      console.warn(`[${this.clock.toFixed(2)}] No process found for ${entityType.name}`)
+      // Disabled for performance: console.warn(`[${this.clock.toFixed(2)}] No process found for ${entityType.name}`)
     }
   }
 
@@ -165,21 +165,25 @@ export class GenericDESModel extends DESEngine {
   }
 
   private startProcess(entity: Entity, process: ProcessDef): void {
-    console.log(`[${this.clock.toFixed(2)}] Starting process: ${process.name} for entity ${entity.id}`)
+    // Disabled for performance: console.log(`[${this.clock.toFixed(2)}] Starting process: ${process.name} for entity ${entity.id}`)
+
+    // Store process in entity attributes
+    entity.setAttribute('process', process)
+    entity.setAttribute('processStepIndex', 0)
 
     // Find resource needed from process steps
     const firstStep = process.sequence?.[0]
     const resourceName = firstStep?.resourceName
 
     if (!resourceName) {
-      console.warn(`[${this.clock.toFixed(2)}] Process ${process.name} has no resource in first step`)
+      // Disabled for performance: console.warn(`[${this.clock.toFixed(2)}] Process ${process.name} has no resource in first step`)
       return
     }
 
     const resource = this.getResource(resourceName)
 
     if (!resource) {
-      console.warn(`[${this.clock.toFixed(2)}] Resource ${resourceName} not found`)
+      // Disabled for performance: console.warn(`[${this.clock.toFixed(2)}] Resource ${resourceName} not found`)
       return
     }
 
@@ -190,13 +194,13 @@ export class GenericDESModel extends DESEngine {
       // Get processing time
       const processingTime = this.getProcessingTime(resourceName)
 
-      console.log(`[${this.clock.toFixed(2)}] Entity ${entity.id} seized ${resourceName}, processing for ${processingTime.toFixed(2)} min`)
+      // Disabled for performance: console.log(`[${this.clock.toFixed(2)}] Entity ${entity.id} seized ${resourceName}, processing for ${processingTime.toFixed(2)} min`)
 
       this.scheduleEvent(processingTime, EventType.END_SERVICE, entity, resource, {
         resourceName
       })
     } else {
-      console.log(`[${this.clock.toFixed(2)}] Entity ${entity.id} queued for ${resourceName}`)
+      // Disabled for performance: console.log(`[${this.clock.toFixed(2)}] Entity ${entity.id} queued for ${resourceName}`)
       resource.addToQueue(entity, this.clock)
     }
   }
@@ -206,7 +210,7 @@ export class GenericDESModel extends DESEngine {
     const resourceDef = this.system.resources?.find(r => r.name === resourceName)
 
     if (!resourceDef || !resourceDef.processingTime) {
-      console.warn(`[GenericDESModel] No processing time found for ${resourceName}, using default 1 min`)
+      // Disabled for performance: console.warn(`[GenericDESModel] No processing time found for ${resourceName}, using default 1 min`)
       return 1
     }
 
@@ -230,7 +234,7 @@ export class GenericDESModel extends DESEngine {
         return this.dist.triangular(params.min || 0, params.mode || 1, params.max || 2)
 
       default:
-        console.warn(`[GenericDESModel] Unknown distribution: ${pt.type}`)
+        // Disabled for performance: console.warn(`[GenericDESModel] Unknown distribution: ${pt.type}`)
         return 1
     }
   }
@@ -241,14 +245,20 @@ export class GenericDESModel extends DESEngine {
 
     resource.release(entity, this.clock)
 
-    console.log(`[${this.clock.toFixed(2)}] Entity ${entity.id} released ${resource.name}`)
+    // Disabled for performance: console.log(`[${this.clock.toFixed(2)}] Entity ${entity.id} released ${resource.name}`)
 
-    // Check queue
+    // Check queue and assign process to next entity
     if (resource.getQueueLength() > 0) {
       const nextEntity = resource.removeFromQueue(this.clock)!
-      const process = event.data.process
 
-      this.startProcess(nextEntity, process)
+      // Get the process from the next entity (it should have been set during arrival/queueing)
+      const nextProcess = nextEntity.getAttribute('process') as ProcessDef
+
+      if (nextProcess) {
+        this.startProcess(nextEntity, nextProcess)
+      } else {
+        // Disabled for performance: console.warn(`[${this.clock.toFixed(2)}] Next entity ${nextEntity.id} has no process`)
+      }
     }
 
     // Record statistics
@@ -292,10 +302,10 @@ export class GenericDESModel extends DESEngine {
     }
 
     // Aggregate results
-    return this.aggregateResults(allResults)
+    return this.aggregateResults(allResults, simulationTime)
   }
 
-  private aggregateResults(allResults: any[]): any {
+  private aggregateResults(allResults: any[], simulationTime: number): any {
     if (allResults.length === 0) {
       return {}
     }
@@ -315,7 +325,13 @@ export class GenericDESModel extends DESEngine {
     const obsNames = Object.keys(allResults[0].observations || {})
 
     for (const obsName of obsNames) {
-      const values = allResults.map(r => r.observations[obsName]?.mean).filter(v => v !== undefined)
+      let values = allResults.map(r => r.observations[obsName]?.mean).filter(v => v !== undefined)
+
+      // Convert throughput from count to rate (parts per hour)
+      if (obsName === 'throughput') {
+        const simulationTimeHours = simulationTime / 60 // Convert minutes to hours
+        values = values.map(v => v / simulationTimeHours) // Convert to parts per hour
+      }
 
       if (values.length > 0) {
         const stat = new ObservationStatistic()

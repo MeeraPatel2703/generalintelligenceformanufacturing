@@ -6,10 +6,12 @@ import dotenv from 'dotenv'
 import { analyzeFactoryData } from './aiService.js'
 // import { cacheService } from './cache.js' // DISABLED - better-sqlite3 causing issues
 import { runSimpleMonteCarlo } from './simulation/simpleSim.js'
-import { runDESSimulation } from './simulation/desRunner.js'
+import { runDESSimulation, runComprehensiveSimulation } from './simulation/desRunner.js'
 import { parseDocument, validateDocumentFile, getDocumentInfo } from './documentParser.js'
 import { extractSystemFromDocument } from './entityExtractor.js'
 import { runDESFromExtractedSystem } from './simulation/SystemToDESMapper.js'
+import { runExtractedSystemWithComprehensiveAnalysis } from './simulation/ExtractedSystemToAnalysisAdapter.js'
+import { initializeChatbot, handleChatbotMessage } from './chatbotService.js'
 
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url)
@@ -119,6 +121,14 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  // Initialize chatbot with OpenAI API key
+  if (process.env.OPENAI_API_KEY) {
+    initializeChatbot(process.env.OPENAI_API_KEY)
+    console.log('[Main] ✓ Chatbot initialized')
+  } else {
+    console.warn('[Main] ⚠️  Chatbot not initialized - missing OPENAI_API_KEY')
+  }
+
   // Set Content-Security-Policy
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     callback({
@@ -466,6 +476,88 @@ ipcMain.handle('document:info', async (_event, filePath: string) => {
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to get document info'
+    }
+  }
+})
+
+// Comprehensive simulation handler (formerly KeyCraft)
+ipcMain.handle('run-comprehensive-simulation', async (_event, extractedSystemOrAnalysis, numReplications: number = 10) => {
+  try {
+    console.log('[Main] Starting comprehensive simulation with advanced analysis')
+    console.log('[Main] Replications:', numReplications)
+
+    // Check if this is an ExtractedSystem (from document) or FactoryAnalysis
+    if (extractedSystemOrAnalysis?.systemName && extractedSystemOrAnalysis?.entities) {
+      // For ExtractedSystem: Convert to FactoryAnalysis using adapter
+      console.log('[Main] ExtractedSystem detected - using adapter to convert to FactoryAnalysis')
+      console.log('[Main] System:', extractedSystemOrAnalysis.systemName)
+
+      // Run simulation and convert to FactoryAnalysis format
+      const factoryAnalysis = runExtractedSystemWithComprehensiveAnalysis(
+        extractedSystemOrAnalysis,
+        480, // 8 hours simulation time
+        numReplications
+      )
+
+      console.log('[Main] Adapter conversion complete, running comprehensive analysis...')
+
+      // Now run comprehensive analysis on the converted data
+      const comprehensiveResults = runComprehensiveSimulation(
+        factoryAnalysis,
+        numReplications,
+        (progress) => {
+          if (mainWindow) {
+            mainWindow.webContents.send('simulation-progress', progress)
+          }
+        }
+      )
+
+      console.log('[Main] Comprehensive simulation complete')
+      return {
+        success: true,
+        results: comprehensiveResults
+      }
+    } else {
+      // For FactoryAnalysis: Use comprehensive simulation with full Simio-style stats
+      console.log('[Main] Using comprehensive simulation with FactoryAnalysis')
+
+      const comprehensiveResults = runComprehensiveSimulation(
+        extractedSystemOrAnalysis,
+        numReplications,
+        (progress) => {
+          if (mainWindow) {
+            mainWindow.webContents.send('simulation-progress', progress)
+          }
+        }
+      )
+
+      console.log('[Main] Comprehensive simulation complete')
+      return {
+        success: true,
+        results: comprehensiveResults
+      }
+    }
+  } catch (error) {
+    console.error('[Main] Comprehensive simulation error:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Comprehensive simulation failed'
+    }
+  }
+})
+
+// Chatbot message handler
+ipcMain.handle('chatbot:sendMessage', async (_event, request) => {
+  try {
+    console.log('[Main] Chatbot message:', request.message)
+    const response = await handleChatbotMessage(request)
+    console.log('[Main] Chatbot response generated')
+    return response
+  } catch (error) {
+    console.error('[Main] Chatbot error:', error)
+    return {
+      message: '',
+      error: error instanceof Error ? error.message : 'Chatbot error'
     }
   }
 })

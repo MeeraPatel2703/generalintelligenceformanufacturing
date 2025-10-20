@@ -115,3 +115,110 @@ export interface SimulationProgress {
   estimatedTimeRemaining: number;
   message: string;
 }
+
+// =============================================================================
+// COMPREHENSIVE STATISTICS (Simio-style detailed results)
+// =============================================================================
+
+export interface ComprehensiveSimulationResults extends SimulationResults {
+  // Executive summary metrics
+  executiveSummary: {
+    simulationName: string;
+    runDate: Date;
+    duration: number;
+    warmup: number;
+    replications: number;
+    status: 'success' | 'warning' | 'error';
+    warnings: string[];
+  };
+
+  // Detailed statistical analysis
+  statisticalAnalysis: {
+    confidenceIntervals: Record<string, {
+      pointEstimate: number;
+      lowerBound: number;
+      upperBound: number;
+      confidenceLevel: number;
+      standardError: number;
+    }>;
+
+    // SMORE plot data (Summary, Mean, Outlier, Range, Extreme)
+    smorePlots: Record<string, {
+      mean: number;
+      ciLower: number;
+      ciUpper: number;
+      percentile5: number;
+      percentile95: number;
+      minimum: number;
+      maximum: number;
+    }>;
+  };
+
+  // Performance metrics verification
+  performanceMetrics: {
+    // Little's Law: WIP = Throughput × Lead Time
+    littlesLaw: {
+      wip: number;
+      throughput: number;
+      leadTime: number;
+      verified: boolean;
+      discrepancy: number;
+    };
+    valueAddedPercentage: number;
+    nonValueAddedPercentage: number;
+    overallEquipmentEffectiveness: number;
+  };
+
+  // Root cause analysis
+  rootCauseAnalysis?: {
+    primaryBottleneck: {
+      machineId: string;
+      utilization: number;
+      impactOnThroughput: number;
+      evidence: string[];
+    };
+    secondaryConstraints: Array<{
+      type: 'capacity' | 'variability' | 'quality' | 'policy';
+      description: string;
+      impact: 'low' | 'medium' | 'high';
+    }>;
+    systemicIssues: string[];
+    hiddenFactors: string[];
+  };
+
+  // Improvement scenarios
+  improvementScenarios?: ImprovementScenario[];
+}
+
+export interface ImprovementScenario {
+  id: string;
+  name: string;
+  description: string;
+  changes: ScenarioChange[];
+  investmentCost: number;
+  implementationTime: string;
+  implementationEffort: 'low' | 'medium' | 'high';
+
+  // Projected results
+  projectedResults?: {
+    throughputImprovement: number; // percentage
+    cycleTimeReduction: number; // percentage
+    utilizationIncrease: number; // percentage
+    roi: {
+      weeklyRevenueDelta: number;
+      annualRevenueDelta: number;
+      paybackMonths: number;
+      threeYearNPV: number;
+      irr: number;
+    };
+  };
+}
+
+export interface ScenarioChange {
+  type: 'capacity' | 'speed' | 'quality' | 'policy' | 'batch';
+  target: string;
+  parameter: string;
+  oldValue: any;
+  newValue: any;
+  rationale: string;
+}

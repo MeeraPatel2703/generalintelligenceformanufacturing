@@ -140,6 +140,82 @@ export class Distributions {
 
     return k - 1
   }
+
+  weibull(shape: number, scale: number): number {
+    // Weibull distribution
+    const u = this.rng.next()
+    return scale * Math.pow(-Math.log(1 - u), 1 / shape)
+  }
+
+  lognormal(mu: number, sigma: number): number {
+    // Lognormal distribution
+    const z = this.normal(0, 1)
+    return Math.exp(mu + sigma * z)
+  }
+
+  erlang(shape: number, rate: number): number {
+    // Erlang distribution (special case of Gamma with integer shape)
+    return this.gammaSample(shape) / rate
+  }
+
+  binomial(n: number, p: number): number {
+    // Binomial distribution
+    let count = 0
+    for (let i = 0; i < n; i++) {
+      if (this.rng.next() < p) count++
+    }
+    return count
+  }
+
+  geometric(p: number): number {
+    // Geometric distribution (number of trials until first success)
+    return Math.floor(Math.log(1 - this.rng.next()) / Math.log(1 - p)) + 1
+  }
+
+  negativeBinomial(r: number, p: number): number {
+    // Negative binomial (number of failures before r successes)
+    let failures = 0
+    let successes = 0
+    while (successes < r) {
+      if (this.rng.next() < p) {
+        successes++
+      } else {
+        failures++
+      }
+    }
+    return failures
+  }
+
+  empirical(values: number[], probabilities: number[]): number {
+    // Empirical distribution from data
+    const u = this.rng.next()
+    let cumulative = 0
+    for (let i = 0; i < probabilities.length; i++) {
+      cumulative += probabilities[i]
+      if (u <= cumulative) {
+        return values[i]
+      }
+    }
+    return values[values.length - 1]
+  }
+
+  johnson(gamma: number, delta: number, lambda: number, xi: number): number {
+    // Johnson distribution
+    const z = this.normal(0, 1)
+    return xi + lambda * Math.sinh((z - gamma) / delta)
+  }
+
+  pearson5(alpha: number, beta: number): number {
+    // Pearson Type V distribution (inverse gamma)
+    return 1 / this.gammaSample(alpha) * beta
+  }
+
+  pearson6(alpha1: number, alpha2: number, beta: number): number {
+    // Pearson Type VI distribution
+    const x1 = this.gammaSample(alpha1)
+    const x2 = this.gammaSample(alpha2)
+    return beta * (x1 / x2)
+  }
 }
 
 // ============================================================================
@@ -151,8 +227,13 @@ export class TimeWeightedStatistic {
   private lastValue: number = 0
   private lastTime: number = 0
   private timeWeightedSum: number = 0
+  private startTime: number = 0
 
   update(time: number, value: number): void {
+    if (this.values.length === 0) {
+      this.startTime = time
+    }
+    
     if (this.values.length > 0) {
       const duration = time - this.lastTime
       this.timeWeightedSum += this.lastValue * duration
@@ -168,7 +249,9 @@ export class TimeWeightedStatistic {
 
     const duration = currentTime - this.lastTime
     const totalSum = this.timeWeightedSum + this.lastValue * duration
-    return totalSum / currentTime
+    const totalDuration = currentTime - this.startTime
+    
+    return totalDuration > 0 ? totalSum / totalDuration : 0
   }
 
   getMax(): number {
@@ -384,7 +467,8 @@ export class Resource {
     if (this.available > 0) {
       this.available--
       this.busySince.set(entity.id, time)
-      this.utilizationStat.update(time, this.capacity - this.available)
+      // Record utilization as busy units / total capacity
+      this.utilizationStat.update(time, (this.capacity - this.available) / this.capacity)
       return true
     }
     return false
@@ -398,7 +482,8 @@ export class Resource {
     }
 
     this.available++
-    this.utilizationStat.update(time, this.capacity - this.available)
+    // Record utilization as busy units / total capacity
+    this.utilizationStat.update(time, (this.capacity - this.available) / this.capacity)
   }
 
   addToQueue(entity: Entity, time: number): void {
@@ -417,7 +502,8 @@ export class Resource {
   }
 
   getUtilization(currentTime: number): number {
-    return this.utilizationStat.getMean(currentTime) / this.capacity
+    const utilization = this.utilizationStat.getMean(currentTime)
+    return Math.max(0, Math.min(1, utilization)) // Bound between 0 and 1
   }
 
   reset(): void {

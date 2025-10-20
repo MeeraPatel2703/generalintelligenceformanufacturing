@@ -75,7 +75,7 @@ export function runSimpleMonteCarlo(
   for (let i = 0; i < numReplications; i++) {
     // Sample cycle time for each machine
     const machineTimes = analysis.machines.map(m => {
-      return sampleNormal(m.cycle_time.mean, m.cycle_time.std_dev);
+      return sampleNormal(m.cycle_time.mean, m.cycle_time.std_dev || 0);
     });
 
     // Bottleneck = machine with maximum cycle time (limits throughput)

@@ -1,0 +1,412 @@
+/**
+ * Chatbot Styles
+ * Styling for the AI chatbot interface
+ */
+
+/* Chatbot Sidebar */
+.chatbot-sidebar,
+.question-sidebar {
+  font-family: var(--font-mono);
+  color: var(--color-text-primary);
+}
+
+/* Message Styles */
+.chatbot-message {
+  position: relative;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.chatbot-message--user {
+  margin-left: auto;
+  text-align: right;
+}
+
+.chatbot-message--assistant {
+  margin-right: auto;
+  text-align: left;
+}
+
+/* Typing Indicator */
+.chatbot-typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  font-family: var(--font-mono);
+}
+
+.chatbot-typing-indicator span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  animation: typing 1.4s infinite ease-in-out;
+}
+
+.chatbot-typing-indicator span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.chatbot-typing-indicator span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes typing {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Result Tables */
+.chatbot-result-table {
+  margin-top: 12px;
+  overflow-x: auto;
+}
+
+.chatbot-result-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+}
+
+.chatbot-result-table th,
+.chatbot-result-table td {
+  padding: 8px 12px;
+  text-align: left;
+  border: 1px solid var(--color-border);
+}
+
+.chatbot-result-table th {
+  background-color: var(--color-bg-tertiary);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.chatbot-result-table td {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-secondary);
+}
+
+.chatbot-result-table tr:nth-child(even) td {
+  background-color: var(--color-bg-secondary);
+}
+
+/* Comparison Results */
+.chatbot-comparison {
+  margin-top: 12px;
+  overflow-x: auto;
+}
+
+.chatbot-comparison table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+}
+
+.chatbot-comparison th,
+.chatbot-comparison td {
+  padding: 8px 12px;
+  text-align: left;
+  border: 1px solid var(--color-border);
+}
+
+.chatbot-comparison th {
+  background-color: var(--color-bg-tertiary);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.chatbot-comparison td {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-secondary);
+}
+
+.chatbot-comparison tr:nth-child(even) td {
+  background-color: var(--color-bg-secondary);
+}
+
+/* Bottleneck Analysis */
+.chatbot-bottleneck {
+  margin-top: 12px;
+}
+
+.chatbot-bottleneck .bottleneck-item {
+  margin-bottom: 12px;
+  padding: 12px;
+  background-color: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.chatbot-bottleneck .bottleneck-resource {
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: 8px;
+}
+
+.chatbot-bottleneck .bottleneck-metrics {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.chatbot-bottleneck .bottleneck-recommendations {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.chatbot-bottleneck .recommendation-item {
+  margin-top: 4px;
+  padding-left: 12px;
+  border-left: 2px solid var(--color-primary);
+}
+
+/* Statistics */
+.chatbot-statistics {
+  margin-top: 12px;
+}
+
+.chatbot-statistics pre {
+  font-size: 0.85rem;
+  overflow: auto;
+  background-color: var(--color-bg-tertiary);
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  font-family: var(--font-mono);
+}
+
+/* Scenario Results */
+.chatbot-scenario-result {
+  margin-top: 12px;
+}
+
+.chatbot-scenario-result .scenario-success {
+  padding: 12px;
+  background-color: rgba(16, 185, 129, 0.1);
+  border: 1px solid #10b981;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  color: #10b981;
+  font-weight: 600;
+}
+
+.chatbot-scenario-result .scenario-metrics {
+  font-size: 0.85rem;
+  line-height: 1.8;
+}
+
+.chatbot-scenario-result .metric-item {
+  margin-bottom: 4px;
+}
+
+.chatbot-scenario-result .metric-label {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.chatbot-scenario-result .metric-value {
+  color: var(--color-text-secondary);
+}
+
+/* Question Categories */
+.question-category {
+  margin-bottom: 12px;
+}
+
+.question-category-header {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.question-category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.question-category-button {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.question-category-button:hover {
+  border-color: var(--color-primary);
+}
+
+.question-category-button.active {
+  background: var(--color-primary);
+  color: #000;
+}
+
+/* Question List */
+.question-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.question-item {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  line-height: 1.4;
+}
+
+.question-item:hover {
+  border-color: var(--color-primary);
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.question-text {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.question-description {
+  font-size: 0.65rem;
+  color: var(--color-text-secondary);
+  opacity: 0.8;
+}
+
+/* Advanced Toggle */
+.advanced-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.advanced-toggle button {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 0.7rem;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  transition: all 0.2s;
+  flex: 1;
+}
+
+.advanced-toggle button:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.advanced-toggle button.active {
+  background: var(--color-primary);
+  color: #000;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .chatbot-sidebar,
+  .question-sidebar {
+    width: 100vw;
+    height: 100vh;
+  }
+  
+  .question-category-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Scrollbar Styling */
+.chatbot-sidebar::-webkit-scrollbar,
+.question-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chatbot-sidebar::-webkit-scrollbar-track,
+.question-sidebar::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+
+.chatbot-sidebar::-webkit-scrollbar-thumb,
+.question-sidebar::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.chatbot-sidebar::-webkit-scrollbar-thumb:hover,
+.question-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* Animation for new messages */
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chatbot-message {
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+/* Loading states */
+.chatbot-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.chatbot-loading .chatbot-message {
+  animation: none;
+}
+
+/* Error states */
+.chatbot-error {
+  border-color: #ef4444 !important;
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+.chatbot-error .chatbot-message {
+  color: #ef4444;
+}
+
+/* Success states */
+.chatbot-success {
+  border-color: #10b981 !important;
+  background-color: rgba(16, 185, 129, 0.1) !important;
+}
+
+.chatbot-success .chatbot-message {
+  color: #10b981;
+}

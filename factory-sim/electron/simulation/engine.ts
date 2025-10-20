@@ -85,7 +85,7 @@ export class SimulationEngine {
   /**
    * Run simulation with multiple replications
    */
-  run(progressCallback?: (progress: number) => void): SimulationResults {
+  run(progressCallback?: (progress: number) => void): SimulationResults & { replications: ReplicationResult[] } {
     const replications: ReplicationResult[] = [];
 
     console.log(`[DES Engine] Starting ${this.config.numReplications} replications`);
@@ -99,7 +99,11 @@ export class SimulationEngine {
       }
     }
 
-    return this.aggregateResults(replications);
+    const baseResults = this.aggregateResults(replications);
+    return {
+      ...baseResults,
+      replications
+    };
   }
 
   /**
