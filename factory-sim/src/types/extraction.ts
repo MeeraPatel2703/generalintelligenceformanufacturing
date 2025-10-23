@@ -27,6 +27,7 @@ export interface Distribution {
 
     // Exponential
     rate?: number;
+    lambda?: number; // Alternative parameter for exponential (1/mean)
 
     // Uniform
     min?: number;
@@ -380,6 +381,14 @@ export interface Assumption {
 // MAIN EXTRACTED SYSTEM
 // ============================================================================
 
+export interface SimulationConfig {
+  runLength: number;
+  runLengthUnit: 'minutes' | 'hours' | 'days' | 'weeks';
+  warmupPeriod?: number;
+  warmupUnit?: 'minutes' | 'hours' | 'days' | 'weeks';
+  replications?: number;
+}
+
 export interface ExtractedSystem {
   systemType: 'service' | 'manufacturing' | 'logistics' | 'healthcare' | 'custom';
   systemName: string;
@@ -392,6 +401,9 @@ export interface ExtractedSystem {
   spatialLayout?: SpatialLayout;
   objectives: Objective[];
   experiments: Experiment[];
+
+  // Simulation configuration
+  simulationConfig?: SimulationConfig;
 
   // Metadata about extraction quality
   missingInformation: MissingInformation[];

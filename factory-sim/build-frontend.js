@@ -59,7 +59,7 @@ esbuild.build({
   fs.writeFileSync(path.join(distDir, 'index.html'), modifiedHtml);
   console.log('[Build] index.html copied to dist/');
 
-  console.log('[Build] ✓ Frontend ready for Electron');
+  console.log('[Build] Frontend ready for Electron');
 }).catch((error) => {
   console.error('[Build] Build failed:', error);
   process.exit(1);

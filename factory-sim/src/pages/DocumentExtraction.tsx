@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ExtractedSystem } from '../types/extraction';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { SimpleIndustrialSim } from '../components/SimpleIndustrialSim';
+import { EditableConfigPage } from './EditableConfigPage';
 import { useDESModelStore } from '../store/desModelStore';
 import '../styles/industrial-theme.css';
 
@@ -30,6 +31,7 @@ export function DocumentExtraction() {
   const [simulating, setSimulating] = useState(false);
   const [simulationResults, setSimulationResults] = useState<any>(null);
   const [showLiveView, setShowLiveView] = useState(true);
+  const [showEditConfig, setShowEditConfig] = useState(false);
 
   // DES Model Store
   const { setExtractedSystem: setDESSystem } = useDESModelStore();
@@ -140,6 +142,7 @@ export function DocumentExtraction() {
       setWarnings(result.warnings || []);
       setTokensUsed(result.tokensUsed || null);
       setExtracting(false);
+      setShowEditConfig(true); // Automatically show edit page after extraction
 
       console.log('[DocumentExtraction] State updated, extracting=false');
     } catch (err) {
@@ -164,6 +167,22 @@ export function DocumentExtraction() {
     URL.revokeObjectURL(url);
   };
 
+  const handleSaveConfig = (updatedSystem: ExtractedSystem) => {
+    console.log('[DocumentExtraction] Saving updated configuration');
+    setExtractedSystem(updatedSystem);
+    setDESSystem(updatedSystem);
+    setShowEditConfig(false);
+  };
+
+  const handleCancelConfig = () => {
+    console.log('[DocumentExtraction] Canceling config edits');
+    setShowEditConfig(false);
+  };
+
+  const handleEditConfig = () => {
+    setShowEditConfig(true);
+  };
+
   const handleReset = () => {
     setDocumentData(null);
     setExtractedSystem(null);
@@ -173,6 +192,7 @@ export function DocumentExtraction() {
     setSimulating(false);
     setSimulationResults(null);
     setShowLiveView(true);
+    setShowEditConfig(false);
   };
 
   const formatFileSize = (bytes: number): string => {
@@ -190,6 +210,19 @@ export function DocumentExtraction() {
   console.log('[DocumentExtraction] RENDER - simulationResults:', !!simulationResults);
   console.log('[DocumentExtraction] RENDER - showLiveView:', showLiveView);
   console.log('[DocumentExtraction] RENDER - Will show LiveCanvas?', (simulating || simulationResults) && extractedSystem && showLiveView);
+
+  // Show editable config page if requested and we have an extracted system
+  if (showEditConfig && extractedSystem) {
+    return (
+      <ErrorBoundary>
+        <EditableConfigPage
+          system={extractedSystem}
+          onSave={handleSaveConfig}
+          onCancel={handleCancelConfig}
+        />
+      </ErrorBoundary>
+    );
+  }
 
   return (
     <ErrorBoundary>

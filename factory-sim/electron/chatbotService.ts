@@ -4,9 +4,9 @@
  */
 
 import OpenAI from 'openai';
+import { safeLog, safeError } from './safeConsole.js';
 import {
   ChatMessage,
-  SimulationFunction,
   QuerySimulationDataArgs,
   RunScenarioArgs,
   CompareScenarioArgs,
@@ -34,20 +34,22 @@ export function initializeChatbot(apiKey: string) {
     apiKey,
     dangerouslyAllowBrowser: false, // We're in Node.js (Electron main process)
   });
-  console.log('[ChatbotService] OpenAI client initialized');
+  safeLog('[ChatbotService] OpenAI client initialized');
 }
 
 // ============================================================================
-// FUNCTION DEFINITIONS
+// FUNCTION DEFINITIONS (OpenAI Tools Format)
 // ============================================================================
 
-const SIMULATION_FUNCTIONS: SimulationFunction[] = [
+const SIMULATION_TOOLS = [
   {
-    name: 'querySimulationData',
-    description: 'Query simulation data with filters and aggregations. Use this to answer questions about existing simulation results.',
-    parameters: {
-      type: 'object',
-      properties: {
+    type: 'function' as const,
+    function: {
+      name: 'querySimulationData',
+      description: 'Query simulation data with filters and aggregations. Use this to answer questions about existing simulation results.',
+      parameters: {
+        type: 'object',
+        properties: {
         filters: {
           type: 'object',
           properties: {
@@ -73,13 +75,16 @@ const SIMULATION_FUNCTIONS: SimulationFunction[] = [
           description: 'Aggregation function',
         },
       },
-      required: ['metrics'],
+        required: ['metrics'],
+      },
     },
   },
   {
-    name: 'runScenario',
-    description: 'Run a new simulation scenario with specified parameters. Use this when user wants to test changes.',
-    parameters: {
+    type: 'function' as const,
+    function: {
+      name: 'runScenario',
+      description: 'Run a new simulation scenario with specified parameters. Use this when user wants to test changes.',
+      parameters: {
       type: 'object',
       properties: {
         scenarioName: { type: 'string', description: 'Name for this scenario' },
@@ -99,13 +104,16 @@ const SIMULATION_FUNCTIONS: SimulationFunction[] = [
             replications: { type: 'number', description: 'Number of replications (default 30)' },
           },
         },
-        description: { type: 'string', description: 'Description of what this scenario tests' },
+          description: { type: 'string', description: 'Description of what this scenario tests' },
+        },
+        required: ['parameters'],
       },
-      required: ['parameters'],
     },
   },
   {
-    name: 'compareScenarios',
+    type: 'function' as const,
+    function: {
+      name: 'compareScenarios',
     description: 'Compare multiple scenarios side-by-side. Use when user wants to compare results.',
     parameters: {
       type: 'object',
@@ -120,13 +128,16 @@ const SIMULATION_FUNCTIONS: SimulationFunction[] = [
           items: { type: 'string' },
           description: 'Metrics to compare',
         },
-        showDifference: { type: 'boolean', description: 'Show percentage differences' },
+          showDifference: { type: 'boolean', description: 'Show percentage differences' },
+        },
+        required: ['scenarioIds', 'metrics'],
       },
-      required: ['scenarioIds', 'metrics'],
     },
   },
   {
-    name: 'getStatistics',
+    type: 'function' as const,
+    function: {
+      name: 'getStatistics',
     description: 'Get detailed statistics for a specific metric. Use for statistical analysis requests.',
     parameters: {
       type: 'object',
@@ -143,25 +154,31 @@ const SIMULATION_FUNCTIONS: SimulationFunction[] = [
           enum: ['mean', 'median', 'stddev', 'percentile', 'histogram'],
           description: 'Type of statistic to compute',
         },
-        percentile: { type: 'number', description: 'Percentile value (0-100) if statisticType is percentile' },
+          percentile: { type: 'number', description: 'Percentile value (0-100) if statisticType is percentile' },
+        },
+        required: ['metric'],
       },
-      required: ['metric'],
     },
   },
   {
-    name: 'analyzeBottleneck',
+    type: 'function' as const,
+    function: {
+      name: 'analyzeBottleneck',
     description: 'Analyze bottlenecks in the simulation. Use when user asks about bottlenecks or performance issues.',
     parameters: {
       type: 'object',
       properties: {
         scenarioId: { type: 'string', description: 'Scenario to analyze (optional, defaults to current)' },
-        threshold: { type: 'number', description: 'Utilization threshold for bottleneck detection (default 0.85)' },
+          threshold: { type: 'number', description: 'Utilization threshold for bottleneck detection (default 0.85)' },
+        },
+        required: [],
       },
-      required: [],
     },
   },
   {
-    name: 'optimizeParameters',
+    type: 'function' as const,
+    function: {
+      name: 'optimizeParameters',
     description: 'Optimize simulation parameters to achieve an objective. Use when user wants optimization.',
     parameters: {
       type: 'object',
@@ -182,10 +199,11 @@ const SIMULATION_FUNCTIONS: SimulationFunction[] = [
         parameters: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Parameters to optimize',
+            description: 'Parameters to optimize',
+          },
         },
+        required: ['objective', 'parameters'],
       },
-      required: ['objective', 'parameters'],
     },
   },
 ];
@@ -279,32 +297,45 @@ export async function handleChatbotMessage(request: ChatbotRequest): Promise<Cha
       content: request.message,
     });
 
-    // Call OpenAI with function calling
+    // Call OpenAI with tools (function calling)
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
+      model: 'gpt-4o',  // Updated to latest model
       messages,
-      functions: SIMULATION_FUNCTIONS as any,
-      function_call: 'auto',
+      tools: SIMULATION_TOOLS,
+      tool_choice: 'auto',
       temperature: 0.7,
-      max_tokens: 1000,
+      max_tokens: 1500,
     });
 
     const choice = completion.choices[0];
 
-    // Check if function call was made
-    if (choice.message.function_call) {
-      const functionName = choice.message.function_call.name;
-      const functionArgs = JSON.parse(choice.message.function_call.arguments);
+    // Check if tool calls were made
+    if (choice.message.tool_calls && choice.message.tool_calls.length > 0) {
+      const toolCall = choice.message.tool_calls[0];
 
-      console.log(`[ChatbotService] Function call: ${functionName}`, functionArgs);
+      // Type guard to ensure we have a function tool call
+      if (toolCall.type !== 'function') {
+        return { message: 'Unsupported tool call type', error: 'Only function tools are supported' };
+      }
+
+      const functionName = toolCall.function.name;
+      const functionArgs = JSON.parse(toolCall.function.arguments);
+
+      safeLog(`[ChatbotService] Tool call: ${functionName}`, functionArgs);
 
       // Execute the function
-      const functionResult = await executeFunction(
-        functionName,
-        functionArgs,
-        request.system,
-        request.currentResults
-      );
+      let functionResult;
+      try {
+        functionResult = await executeFunction(
+          functionName,
+          functionArgs,
+          request.system,
+          request.currentResults
+        );
+      } catch (error) {
+        safeError(`[ChatbotService] Function execution error:`, error);
+        functionResult = { error: error instanceof Error ? error.message : 'Function execution failed' };
+      }
 
       // Get follow-up response from OpenAI with function result
       const followUpMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
@@ -312,20 +343,20 @@ export async function handleChatbotMessage(request: ChatbotRequest): Promise<Cha
         {
           role: 'assistant',
           content: choice.message.content || null,
-          function_call: choice.message.function_call as any,
+          tool_calls: choice.message.tool_calls,
         },
         {
-          role: 'function',
-          name: functionName,
+          role: 'tool',
+          tool_call_id: toolCall.id,
           content: JSON.stringify(functionResult),
         },
       ];
 
       const followUpCompletion = await openai.chat.completions.create({
-        model: 'gpt-4-turbo-preview',
+        model: 'gpt-4o',
         messages: followUpMessages,
         temperature: 0.7,
-        max_tokens: 1000,
+        max_tokens: 1500,
       });
 
       return {
@@ -341,7 +372,7 @@ export async function handleChatbotMessage(request: ChatbotRequest): Promise<Cha
     };
 
   } catch (error) {
-    console.error('[ChatbotService] Error:', error);
+    safeError('[ChatbotService] Error:', error);
     return {
       message: '',
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -386,7 +417,7 @@ function querySimulationData(
   _system: ExtractedSystem,
   currentResults?: ComprehensiveSimulationResults
 ): QueryResult {
-  console.log('[ChatbotService] querySimulationData', args);
+  safeLog('[ChatbotService] querySimulationData', args);
 
   if (!currentResults) {
     return {
@@ -402,51 +433,108 @@ function querySimulationData(
   args.metrics.forEach((metric: string) => {
     const metricData: any = { metric };
 
-    switch (metric) {
-      case 'throughput':
-        metricData.value = currentResults.throughput.mean;
-        if (Array.isArray(currentResults.throughput.confidenceInterval)) {
-          metricData.ci = `[${currentResults.throughput.confidenceInterval[0].toFixed(2)}, ${currentResults.throughput.confidenceInterval[1].toFixed(2)}]`;
-        }
-        break;
-      case 'cycleTime':
-        metricData.value = currentResults.cycleTime.mean;
-        if (Array.isArray(currentResults.cycleTime.confidenceInterval)) {
-          metricData.ci = `[${currentResults.cycleTime.confidenceInterval[0].toFixed(2)}, ${currentResults.cycleTime.confidenceInterval[1].toFixed(2)}]`;
-        }
-        break;
-      case 'utilization':
-        // Average utilization across all resources
-        const resourceMetrics = (currentResults as any).resourceMetrics;
-        if (resourceMetrics) {
-          const resources = Object.values(resourceMetrics) as any[];
-          const avgUtil = resources.reduce((sum, r) => sum + r.utilization.mean, 0) / resources.length;
-          metricData.value = avgUtil;
-        }
-        break;
-      case 'queueLength':
-        const resourceMetrics2 = (currentResults as any).resourceMetrics;
-        if (resourceMetrics2) {
-          const resources = Object.values(resourceMetrics2) as any[];
-          const avgQueue = resources.reduce((sum, r) => sum + r.queueLength.mean, 0) / resources.length;
-          metricData.value = avgQueue;
-        }
-        break;
-      case 'WIP':
-        metricData.value = (currentResults as any).workInProgress?.mean || 0;
-        break;
+    try {
+      switch (metric) {
+        case 'throughput':
+          // Handle both old and new data structures
+          if (typeof currentResults.throughput === 'object' && currentResults.throughput !== null) {
+            metricData.value = (currentResults.throughput as any).mean || currentResults.throughput;
+            const ci = (currentResults.throughput as any).confidenceInterval;
+            if (Array.isArray(ci)) {
+              metricData.ci = `[${ci[0].toFixed(2)}, ${ci[1].toFixed(2)}]`;
+            }
+          } else {
+            metricData.value = currentResults.throughput;
+          }
+          break;
+        case 'cycleTime':
+          if (typeof currentResults.cycleTime === 'object' && currentResults.cycleTime !== null) {
+            metricData.value = (currentResults.cycleTime as any).mean || currentResults.cycleTime;
+            const ci = (currentResults.cycleTime as any).confidenceInterval;
+            if (Array.isArray(ci)) {
+              metricData.ci = `[${ci[0].toFixed(2)}, ${ci[1].toFixed(2)}]`;
+            }
+          } else {
+            metricData.value = currentResults.cycleTime;
+          }
+          break;
+        case 'utilization':
+          // Try multiple ways to get utilization
+          const resourceStats = (currentResults as any).resourceStats;
+          const resourceMetrics = (currentResults as any).resourceMetrics;
+          if (resourceStats && Array.isArray(resourceStats)) {
+            const avgUtil = resourceStats.reduce((sum: number, r: any) =>
+              sum + ((r.utilization?.average || r.utilization?.mean || r.utilization) || 0), 0
+            ) / resourceStats.length;
+            metricData.value = avgUtil;
+          } else if (resourceMetrics) {
+            const resources = Object.values(resourceMetrics) as any[];
+            const avgUtil = resources.reduce((sum, r) =>
+              sum + ((r.utilization?.mean || r.utilization) || 0), 0
+            ) / resources.length;
+            metricData.value = avgUtil;
+          } else {
+            metricData.value = 0;
+          }
+          break;
+        case 'queueLength':
+          const resourceStats2 = (currentResults as any).resourceStats;
+          const resourceMetrics2 = (currentResults as any).resourceMetrics;
+          if (resourceStats2 && Array.isArray(resourceStats2)) {
+            const avgQueue = resourceStats2.reduce((sum: number, r: any) =>
+              sum + ((r.averageQueue?.mean || r.queueLength?.mean || r.avgQueueLength) || 0), 0
+            ) / resourceStats2.length;
+            metricData.value = avgQueue;
+          } else if (resourceMetrics2) {
+            const resources = Object.values(resourceMetrics2) as any[];
+            const avgQueue = resources.reduce((sum, r) =>
+              sum + ((r.queueLength?.mean || r.avgQueueLength) || 0), 0
+            ) / resources.length;
+            metricData.value = avgQueue;
+          } else {
+            metricData.value = 0;
+          }
+          break;
+        case 'waitTime':
+          // Try to get wait time from queue stats
+          const queueStats = (currentResults as any).queueStats;
+          if (queueStats && Array.isArray(queueStats)) {
+            const avgWait = queueStats.reduce((sum: number, q: any) =>
+              sum + (q.avgWaitTime || 0), 0
+            ) / queueStats.length;
+            metricData.value = avgWait;
+          } else {
+            metricData.value = 0;
+          }
+          break;
+        case 'WIP':
+          metricData.value = (currentResults as any).workInProgress?.mean || 0;
+          break;
+        default:
+          metricData.value = 0;
+          metricData.error = 'Unknown metric';
+      }
+    } catch (error) {
+      safeError(`[ChatbotService] Error extracting metric ${metric}:`, error);
+      metricData.value = 0;
+      metricData.error = 'Extraction error';
     }
 
     data.push(metricData);
   });
 
   // Compute summary statistics
-  const values = data.map(d => d.value).filter(v => typeof v === 'number');
-  const summary = {
+  const values = data.map(d => d.value).filter(v => typeof v === 'number' && !isNaN(v));
+  const summary = values.length > 0 ? {
     count: values.length,
     mean: values.reduce((a, b) => a + b, 0) / values.length,
     min: Math.min(...values),
     max: Math.max(...values),
+  } : {
+    count: 0,
+    mean: 0,
+    min: 0,
+    max: 0,
   };
 
   return { data, metrics: args.metrics, summary };
@@ -456,7 +544,7 @@ async function runScenario(
   args: RunScenarioArgs,
   system: ExtractedSystem
 ): Promise<{ scenarioId: string; results: ComprehensiveSimulationResults }> {
-  console.log('[ChatbotService] runScenario', args);
+  safeLog('[ChatbotService] runScenario', args);
 
   // Create modified system with new parameters
   const modifiedSystem: ExtractedSystem = JSON.parse(JSON.stringify(system));
@@ -513,7 +601,7 @@ async function runScenario(
 }
 
 function compareScenarios(args: CompareScenarioArgs): ComparisonResult {
-  console.log('[ChatbotService] compareScenarios', args);
+  safeLog('[ChatbotService] compareScenarios', args);
 
   const scenarios: ComparisonResult['scenarios'] = [];
 
@@ -525,20 +613,42 @@ function compareScenarios(args: CompareScenarioArgs): ComparisonResult {
 
     const metrics: Record<string, number> = {};
     args.metrics.forEach((metric: string) => {
-      switch (metric) {
-        case 'throughput':
-          metrics[metric] = scenario.results!.throughput.mean;
-          break;
-        case 'cycleTime':
-          metrics[metric] = scenario.results!.cycleTime.mean;
-          break;
-        case 'utilization':
-          const resourceMetrics = (scenario.results as any).resourceMetrics;
-          if (resourceMetrics) {
-            const resources = Object.values(resourceMetrics) as any[];
-            metrics[metric] = resources.reduce((sum, r) => sum + r.utilization.mean, 0) / resources.length;
-          }
-          break;
+      try {
+        switch (metric) {
+          case 'throughput':
+            const throughput = scenario.results!.throughput;
+            metrics[metric] = (typeof throughput === 'object' && throughput !== null)
+              ? ((throughput as any).mean || throughput)
+              : throughput;
+            break;
+          case 'cycleTime':
+            const cycleTime = scenario.results!.cycleTime;
+            metrics[metric] = (typeof cycleTime === 'object' && cycleTime !== null)
+              ? ((cycleTime as any).mean || cycleTime)
+              : cycleTime;
+            break;
+          case 'utilization':
+            const resourceStats = (scenario.results as any).resourceStats;
+            const resourceMetrics = (scenario.results as any).resourceMetrics;
+            if (resourceStats && Array.isArray(resourceStats)) {
+              metrics[metric] = resourceStats.reduce((sum: number, r: any) =>
+                sum + ((r.utilization?.average || r.utilization?.mean || r.utilization) || 0), 0
+              ) / resourceStats.length;
+            } else if (resourceMetrics) {
+              const resources = Object.values(resourceMetrics) as any[];
+              metrics[metric] = resources.reduce((sum, r) =>
+                sum + ((r.utilization?.mean || r.utilization) || 0), 0
+              ) / resources.length;
+            } else {
+              metrics[metric] = 0;
+            }
+            break;
+          default:
+            metrics[metric] = 0;
+        }
+      } catch (error) {
+        safeError(`[ChatbotService] Error extracting ${metric} for comparison:`, error);
+        metrics[metric] = 0;
       }
     });
 
@@ -555,7 +665,9 @@ function compareScenarios(args: CompareScenarioArgs): ComparisonResult {
     args.metrics.forEach((metric: string) => {
       const val1 = scenarios[0].metrics[metric];
       const val2 = scenarios[1].metrics[metric];
-      differences[metric] = ((val2 - val1) / val1) * 100; // Percentage difference
+      if (val1 && val1 !== 0) {
+        differences[metric] = ((val2 - val1) / val1) * 100; // Percentage difference
+      }
     });
   }
 
@@ -580,7 +692,7 @@ function getStatistics(
   args: GetStatisticsArgs,
   _currentResults?: ComprehensiveSimulationResults
 ): any {
-  console.log('[ChatbotService] getStatistics', args);
+  safeLog('[ChatbotService] getStatistics', args);
 
   if (!_currentResults) {
     return { error: 'No simulation results available' };
@@ -600,7 +712,7 @@ function analyzeBottleneck(
   _system: ExtractedSystem,
   currentResults?: ComprehensiveSimulationResults
 ): BottleneckAnalysis {
-  console.log('[ChatbotService] analyzeBottleneck', args);
+  safeLog('[ChatbotService] analyzeBottleneck', args);
 
   if (!currentResults) {
     return {
@@ -644,7 +756,7 @@ function optimizeParameters(
   args: OptimizeParametersArgs,
   _system: ExtractedSystem
 ): OptimizationResult {
-  console.log('[ChatbotService] optimizeParameters', args);
+  safeLog('[ChatbotService] optimizeParameters', args);
 
   // Placeholder for GA optimization
   // In real implementation, this would call the GA optimizer from SimioDestroyerPlatform

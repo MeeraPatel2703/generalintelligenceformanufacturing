@@ -1,6 +1,7 @@
 import { readFile } from 'fs/promises';
 import * as path from 'path';
 import { DocumentParseResult } from '../src/types/extraction';
+import { safeLog, safeError } from './safeConsole.js';
 
 // Dynamic imports for document parsers
 let pdfParse: any;
@@ -43,7 +44,7 @@ async function parsePDF(filePath: string): Promise<DocumentParseResult> {
       }
     };
   } catch (error) {
-    console.error('[DocumentParser] PDF parsing error:', error);
+    safeError('[DocumentParser] PDF parsing error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown PDF parsing error'
@@ -73,7 +74,7 @@ async function parseWord(filePath: string): Promise<DocumentParseResult> {
       }
     };
   } catch (error) {
-    console.error('[DocumentParser] Word parsing error:', error);
+    safeError('[DocumentParser] Word parsing error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown Word parsing error'
@@ -99,7 +100,7 @@ async function parseText(filePath: string): Promise<DocumentParseResult> {
       }
     };
   } catch (error) {
-    console.error('[DocumentParser] Text parsing error:', error);
+    safeError('[DocumentParser] Text parsing error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown text parsing error'
@@ -113,8 +114,8 @@ async function parseText(filePath: string): Promise<DocumentParseResult> {
 export async function parseDocument(filePath: string): Promise<DocumentParseResult> {
   const ext = path.extname(filePath).toLowerCase();
 
-  console.log('[DocumentParser] Parsing document:', filePath);
-  console.log('[DocumentParser] File extension:', ext);
+  safeLog('[DocumentParser] Parsing document:', filePath);
+  safeLog('[DocumentParser] File extension:', ext);
 
   switch (ext) {
     case '.pdf':

@@ -10,6 +10,7 @@ import { DocumentExtraction } from './pages/DocumentExtraction'
 import { IntegratedSimulation } from './pages/IntegratedSimulation'
 import { useDESModelStore } from './store/desModelStore'
 import { FloatingChatbotButton } from './components/FloatingChatbotButton'
+import { ChatbotSidebar } from './components/ChatbotSidebar'
 import './index.css'
 
 interface CSVData {
@@ -25,7 +26,7 @@ interface CSVData {
 function App() {
   const [mode, setMode] = useState<'analysis' | 'builder' | 'extraction' | 'simulation'>('extraction')
   const [isChatbotOpen, setIsChatbotOpen] = useState(false)
-  const { extractedSystem } = useDESModelStore()
+  const { extractedSystem, comprehensiveResults } = useDESModelStore()
 
   // Check URL hash for routing
   useEffect(() => {
@@ -201,6 +202,13 @@ function App() {
           ▶️ SIMULATION
         </button>
       )}
+      <button
+        onClick={() => setIsChatbotOpen(!isChatbotOpen)}
+        className={`mode-btn chatbot-btn ${isChatbotOpen ? 'active' : ''}`}
+        title="AI Assistant"
+      >
+        🤖 AI ASSISTANT
+      </button>
     </div>
   );
 
@@ -242,6 +250,33 @@ function App() {
       color: var(--color-bg-primary, #0a0a0a);
       border-color: var(--color-text-primary, #fff);
     }
+
+    .mode-btn.chatbot-btn {
+      border-color: #667eea;
+      color: #667eea;
+    }
+
+    .mode-btn.chatbot-btn:hover {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    .mode-btn.chatbot-btn.active {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 0 8px rgba(102, 126, 234, 0);
+      }
+    }
   `;
 
   // Integrated Simulation mode - SIMPLIFIED!
@@ -251,10 +286,10 @@ function App() {
         <div className="app">
           <ModeSwitcher />
           <style>{modeSwitcherStyles}</style>
-          <div style={{ 
-            padding: '40px', 
-            textAlign: 'center', 
-            backgroundColor: 'var(--color-bg-primary)', 
+          <div style={{
+            padding: '40px',
+            textAlign: 'center',
+            backgroundColor: 'var(--color-bg-primary)',
             minHeight: '100vh',
             display: 'flex',
             alignItems: 'center',
@@ -268,7 +303,7 @@ function App() {
               <p style={{ color: 'var(--color-text-secondary)', marginBottom: '30px', fontSize: '1rem' }}>
                 Please upload a PDF document first to extract your system.
               </p>
-              <button 
+              <button
                 onClick={() => { setMode('extraction'); window.location.hash = ''; }}
                 className="industrial-button industrial-button--primary"
               >
@@ -276,15 +311,29 @@ function App() {
               </button>
             </div>
           </div>
+          {isChatbotOpen && extractedSystem && (
+            <ChatbotSidebar
+              system={extractedSystem}
+              currentResults={comprehensiveResults || undefined}
+              onClose={() => setIsChatbotOpen(false)}
+            />
+          )}
         </div>
       );
     }
-    
+
     return (
       <div className="app">
         <ModeSwitcher />
         <IntegratedSimulation system={extractedSystem} />
         <style>{modeSwitcherStyles}</style>
+        {isChatbotOpen && (
+          <ChatbotSidebar
+            system={extractedSystem}
+            currentResults={comprehensiveResults || undefined}
+            onClose={() => setIsChatbotOpen(false)}
+          />
+        )}
       </div>
     );
   }
@@ -296,6 +345,13 @@ function App() {
         <ModeSwitcher />
         <DocumentExtraction />
         <style>{modeSwitcherStyles}</style>
+        {isChatbotOpen && extractedSystem && (
+          <ChatbotSidebar
+            system={extractedSystem}
+            currentResults={comprehensiveResults || undefined}
+            onClose={() => setIsChatbotOpen(false)}
+          />
+        )}
       </div>
     );
   }

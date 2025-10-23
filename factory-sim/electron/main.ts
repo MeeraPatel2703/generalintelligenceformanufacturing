@@ -12,6 +12,7 @@ import { extractSystemFromDocument } from './entityExtractor.js'
 import { runDESFromExtractedSystem } from './simulation/SystemToDESMapper.js'
 import { runExtractedSystemWithComprehensiveAnalysis } from './simulation/ExtractedSystemToAnalysisAdapter.js'
 import { initializeChatbot, handleChatbotMessage } from './chatbotService.js'
+import { safeLog, safeError, safeWarn } from './safeConsole.js'
 
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url)
@@ -31,8 +32,8 @@ for (const envPath of envPaths) {
   try {
     const result = dotenv.config({ path: envPath })
     if (result.parsed && Object.keys(result.parsed).length > 0) {
-      console.log('[Main] ✓ Loaded .env from:', envPath)
-      console.log('[Main] ✓ Environment variables loaded:', Object.keys(result.parsed).join(', '))
+      safeLog('[Main] Loaded .env from:', envPath)
+      safeLog('[Main] Environment variables loaded:', Object.keys(result.parsed).join(', '))
       envLoaded = true
       break
     }
@@ -42,17 +43,17 @@ for (const envPath of envPaths) {
 }
 
 if (!envLoaded) {
-  console.warn('[Main] ⚠️  Could not find .env file in any of these locations:')
-  envPaths.forEach(p => console.warn('[Main]   -', p))
-  console.warn('[Main] ⚠️  Trying environment variables from system...')
+  safeWarn('[Main] Could not find .env file in any of these locations:')
+  envPaths.forEach(p => safeWarn('[Main]   -', p))
+  safeWarn('[Main] Trying environment variables from system...')
 }
 
 // Verify API key is available
 if (process.env.OPENAI_API_KEY) {
-  console.log('[Main] ✓ OPENAI_API_KEY is available (length:', process.env.OPENAI_API_KEY.length, ')')
+  safeLog('[Main] OPENAI_API_KEY is available (length:', process.env.OPENAI_API_KEY.length, ')')
 } else {
-  console.error('[Main] ✗ OPENAI_API_KEY is NOT available!')
-  console.error('[Main] ✗ Please set OPENAI_API_KEY in .env file or system environment')
+  safeError('[Main] OPENAI_API_KEY is NOT available!')
+  safeError('[Main] Please set OPENAI_API_KEY in .env file or system environment')
 }
 
 // No special command line switches needed for unpackaged mode
@@ -83,8 +84,8 @@ function createWindow() {
   // Determine the preload script path
   // Since we're in dist-electron/electron/main.js, preload.cjs is in the same directory
   const preloadPath = path.join(__dirname, 'preload.cjs')
-  console.log('[Main] __dirname:', __dirname)
-  console.log('[Main] Preload path:', preloadPath)
+  safeLog('[Main] __dirname:', __dirname)
+  safeLog('[Main] Preload path:', preloadPath)
 
   mainWindow = new BrowserWindow({
     width: 1400,
@@ -99,16 +100,16 @@ function createWindow() {
 
   // Listen for preload errors
   mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription) => {
-    console.error('[Main] Page failed to load:', errorCode, errorDescription)
+    safeError('[Main] Page failed to load:', errorCode, errorDescription)
   })
 
   mainWindow.webContents.on('preload-error', (_event, preloadPath, error) => {
-    console.error('[Main] Preload script error:', preloadPath, error)
+    safeError('[Main] Preload script error:', preloadPath, error)
   })
 
   // Always load from bundled HTML (no dev server needed)
   const indexPath = path.join(__dirname, '../../dist/index.html')
-  console.log('[Main] Loading HTML from:', indexPath)
+  safeLog('[Main] Loading HTML from:', indexPath)
 
   mainWindow.loadFile(indexPath)
 
@@ -124,9 +125,9 @@ app.whenReady().then(() => {
   // Initialize chatbot with OpenAI API key
   if (process.env.OPENAI_API_KEY) {
     initializeChatbot(process.env.OPENAI_API_KEY)
-    console.log('[Main] ✓ Chatbot initialized')
+    safeLog('[Main] Chatbot initialized')
   } else {
-    console.warn('[Main] ⚠️  Chatbot not initialized - missing OPENAI_API_KEY')
+    safeWarn('[Main] Chatbot not initialized - missing OPENAI_API_KEY')
   }
 
   // Set Content-Security-Policy
@@ -232,16 +233,16 @@ ipcMain.handle('file:read', async (_event, filePath: string) => {
 // AI Analysis Handler
 ipcMain.handle('analyze-factory-data', async (_event, csvContent: string) => {
   try {
-    console.log('[Main] Starting AI analysis...')
+    safeLog('[Main] Starting AI analysis...')
 
     // Generate hash for caching
     const csvHash = cacheService.hashCSV(csvContent)
-    console.log('[Main] CSV hash:', csvHash.substring(0, 8))
+    safeLog('[Main] CSV hash:', csvHash.substring(0, 8))
 
     // Check cache first
     const cached = cacheService.get(csvHash)
     if (cached) {
-      console.log('[Main] Returning cached analysis')
+      safeLog('[Main] Returning cached analysis')
       const cacheAge = Date.now() - cached.timestamp
       const minutesAgo = Math.floor(cacheAge / 60000)
 
@@ -255,12 +256,12 @@ ipcMain.handle('analyze-factory-data', async (_event, csvContent: string) => {
     }
 
     // Perform AI analysis
-    console.log('[Main] No cache found, calling OpenAI API...')
+    safeLog('[Main] No cache found, calling OpenAI API...')
     const analysis = await analyzeFactoryData(csvContent)
 
     // Cache the result
     cacheService.set(csvHash, JSON.stringify(analysis))
-    console.log('[Main] Analysis complete and cached')
+    safeLog('[Main] Analysis complete and cached')
 
     return {
       success: true,
@@ -268,7 +269,7 @@ ipcMain.handle('analyze-factory-data', async (_event, csvContent: string) => {
       cached: false
     }
   } catch (error) {
-    console.error('[Main] AI analysis error:', error)
+    safeError('[Main] AI analysis error:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error during analysis'
@@ -323,13 +324,13 @@ ipcMain.handle('clear-cache', async () => {
 // DES Simulation handler
 ipcMain.handle('run-simulation', async (_event, extractedSystem, numReplications: number = 100) => {
   try {
-    console.log('[Main] Starting DES simulation with', numReplications, 'replications')
-    console.log('[Main] Extracted system:', extractedSystem?.systemName)
+    safeLog('[Main] Starting DES simulation with', numReplications, 'replications')
+    safeLog('[Main] Extracted system:', extractedSystem?.systemName)
 
     // Check if this is an ExtractedSystem (from document) or old analysis format
     if (extractedSystem?.systemName && extractedSystem?.entities) {
       // New path: Use proper DES engine with extracted system
-      console.log('[Main] Using new DES engine with extracted system')
+      safeLog('[Main] Using new DES engine with extracted system')
 
       const results = runDESFromExtractedSystem(
         extractedSystem,
@@ -337,30 +338,30 @@ ipcMain.handle('run-simulation', async (_event, extractedSystem, numReplications
         numReplications
       )
 
-      console.log('[Main] DES simulation complete')
+      safeLog('[Main] DES simulation complete')
       return {
         success: true,
         results
       }
     } else {
       // Old path: Use legacy DES runner
-      console.log('[Main] Using legacy DES runner')
+      safeLog('[Main] Using legacy DES runner')
 
       const results = runDESSimulation(extractedSystem, numReplications, (progress) => {
         // Send progress updates to renderer
-        if (mainWindow) {
+        if (mainWindow && !mainWindow.isDestroyed()) {
           mainWindow.webContents.send('simulation-progress', progress)
         }
       })
 
-      console.log('[Main] DES simulation complete')
+      safeLog('[Main] DES simulation complete')
       return {
         success: true,
         results
       }
     }
   } catch (error) {
-    console.error('[Main] Simulation error:', error)
+    safeError('[Main] Simulation error:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Simulation failed'
@@ -371,21 +372,21 @@ ipcMain.handle('run-simulation', async (_event, extractedSystem, numReplications
 // Monte Carlo simulation handler (legacy/fast)
 ipcMain.handle('run-monte-carlo', async (_event, analysis, numReplications: number = 1000) => {
   try {
-    console.log('[Main] Starting Monte Carlo simulation with', numReplications, 'replications')
+    safeLog('[Main] Starting Monte Carlo simulation with', numReplications, 'replications')
 
     const results = runSimpleMonteCarlo(analysis, numReplications, (progress) => {
-      if (mainWindow) {
+      if (mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.webContents.send('simulation-progress', progress)
       }
     })
 
-    console.log('[Main] Monte Carlo complete')
+    safeLog('[Main] Monte Carlo complete')
     return {
       success: true,
       results
     }
   } catch (error) {
-    console.error('[Main] Simulation error:', error)
+    safeError('[Main] Simulation error:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Simulation failed'
@@ -396,7 +397,7 @@ ipcMain.handle('run-monte-carlo', async (_event, analysis, numReplications: numb
 // Document parsing handler
 ipcMain.handle('document:parse', async (_event, filePath: string) => {
   try {
-    console.log('[Main] Parsing document:', filePath)
+    safeLog('[Main] Parsing document:', filePath)
 
     // Validate file first
     const validation = await validateDocumentFile(filePath)
@@ -417,14 +418,14 @@ ipcMain.handle('document:parse', async (_event, filePath: string) => {
       }
     }
 
-    console.log('[Main] Document parsed successfully')
+    safeLog('[Main] Document parsed successfully')
     return {
       success: true,
       content: parseResult.content,
       metadata: parseResult.metadata
     }
   } catch (error) {
-    console.error('[Main] Document parsing error:', error)
+    safeError('[Main] Document parsing error:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error during document parsing'
@@ -435,9 +436,9 @@ ipcMain.handle('document:parse', async (_event, filePath: string) => {
 // System extraction handler
 ipcMain.handle('extract-system', async (_event, documentContent: string, documentType: 'pdf' | 'word' | 'text') => {
   try {
-    console.log('[Main] Starting system extraction...')
-    console.log('[Main] Document type:', documentType)
-    console.log('[Main] Content length:', documentContent.length)
+    safeLog('[Main] Starting system extraction...')
+    safeLog('[Main] Document type:', documentType)
+    safeLog('[Main] Content length:', documentContent.length)
 
     const result = await extractSystemFromDocument(documentContent, documentType)
 
@@ -448,7 +449,7 @@ ipcMain.handle('extract-system', async (_event, documentContent: string, documen
       }
     }
 
-    console.log('[Main] System extraction complete')
+    safeLog('[Main] System extraction complete')
     return {
       success: true,
       system: result.system,
@@ -456,7 +457,7 @@ ipcMain.handle('extract-system', async (_event, documentContent: string, documen
       tokensUsed: result.tokensUsed
     }
   } catch (error) {
-    console.error('[Main] System extraction error:', error)
+    safeError('[Main] System extraction error:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error during system extraction'
@@ -483,14 +484,14 @@ ipcMain.handle('document:info', async (_event, filePath: string) => {
 // Comprehensive simulation handler (formerly KeyCraft)
 ipcMain.handle('run-comprehensive-simulation', async (_event, extractedSystemOrAnalysis, numReplications: number = 10) => {
   try {
-    console.log('[Main] Starting comprehensive simulation with advanced analysis')
-    console.log('[Main] Replications:', numReplications)
+    safeLog('[Main] Starting comprehensive simulation with advanced analysis')
+    safeLog('[Main] Replications:', numReplications)
 
     // Check if this is an ExtractedSystem (from document) or FactoryAnalysis
     if (extractedSystemOrAnalysis?.systemName && extractedSystemOrAnalysis?.entities) {
       // For ExtractedSystem: Convert to FactoryAnalysis using adapter
-      console.log('[Main] ExtractedSystem detected - using adapter to convert to FactoryAnalysis')
-      console.log('[Main] System:', extractedSystemOrAnalysis.systemName)
+      safeLog('[Main] ExtractedSystem detected - using adapter to convert to FactoryAnalysis')
+      safeLog('[Main] System:', extractedSystemOrAnalysis.systemName)
 
       // Run simulation and convert to FactoryAnalysis format
       const factoryAnalysis = runExtractedSystemWithComprehensiveAnalysis(
@@ -499,46 +500,46 @@ ipcMain.handle('run-comprehensive-simulation', async (_event, extractedSystemOrA
         numReplications
       )
 
-      console.log('[Main] Adapter conversion complete, running comprehensive analysis...')
+      safeLog('[Main] Adapter conversion complete, running comprehensive analysis...')
 
       // Now run comprehensive analysis on the converted data
       const comprehensiveResults = runComprehensiveSimulation(
         factoryAnalysis,
         numReplications,
         (progress) => {
-          if (mainWindow) {
+          if (mainWindow && !mainWindow.isDestroyed()) {
             mainWindow.webContents.send('simulation-progress', progress)
           }
         }
       )
 
-      console.log('[Main] Comprehensive simulation complete')
+      safeLog('[Main] Comprehensive simulation complete')
       return {
         success: true,
         results: comprehensiveResults
       }
     } else {
       // For FactoryAnalysis: Use comprehensive simulation with full Simio-style stats
-      console.log('[Main] Using comprehensive simulation with FactoryAnalysis')
+      safeLog('[Main] Using comprehensive simulation with FactoryAnalysis')
 
       const comprehensiveResults = runComprehensiveSimulation(
         extractedSystemOrAnalysis,
         numReplications,
         (progress) => {
-          if (mainWindow) {
+          if (mainWindow && !mainWindow.isDestroyed()) {
             mainWindow.webContents.send('simulation-progress', progress)
           }
         }
       )
 
-      console.log('[Main] Comprehensive simulation complete')
+      safeLog('[Main] Comprehensive simulation complete')
       return {
         success: true,
         results: comprehensiveResults
       }
     }
   } catch (error) {
-    console.error('[Main] Comprehensive simulation error:', error)
+    safeError('[Main] Comprehensive simulation error:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Comprehensive simulation failed'
@@ -549,12 +550,12 @@ ipcMain.handle('run-comprehensive-simulation', async (_event, extractedSystemOrA
 // Chatbot message handler
 ipcMain.handle('chatbot:sendMessage', async (_event, request) => {
   try {
-    console.log('[Main] Chatbot message:', request.message)
+    safeLog('[Main] Chatbot message:', request.message)
     const response = await handleChatbotMessage(request)
-    console.log('[Main] Chatbot response generated')
+    safeLog('[Main] Chatbot response generated')
     return response
   } catch (error) {
-    console.error('[Main] Chatbot error:', error)
+    safeError('[Main] Chatbot error:', error)
     return {
       message: '',
       error: error instanceof Error ? error.message : 'Chatbot error'
@@ -564,7 +565,7 @@ ipcMain.handle('chatbot:sendMessage', async (_event, request) => {
 
 // Clean up cache on app quit
 app.on('will-quit', () => {
-  console.log('[Main] Cleaning up before quit')
+  safeLog('[Main] Cleaning up before quit')
   cacheService.clearOld(7) // Clear entries older than 7 days
   cacheService.close()
 })

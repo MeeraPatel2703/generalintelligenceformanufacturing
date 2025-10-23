@@ -1,5 +1,6 @@
 import { FactoryAnalysis } from '../../src/types/analysis';
 import { SimulationResults, StatisticResult } from '../../src/types/simulation';
+import { safeLog } from '../safeConsole.js';
 
 /**
  * Quick Monte Carlo simulation for factory bottleneck analysis
@@ -58,7 +59,7 @@ export function runSimpleMonteCarlo(
   numReplications: number = 1000,
   progressCallback?: (progress: number) => void
 ): SimulationResults {
-  console.log(`[Simulation] Starting Monte Carlo with ${numReplications} replications`);
+  safeLog(`[Simulation] Starting Monte Carlo with ${numReplications} replications`);
 
   const throughputResults: number[] = [];
   const cycleTimeResults: number[] = [];
@@ -125,9 +126,9 @@ export function runSimpleMonteCarlo(
   const bottleneckIdx = avgCycleTimes.indexOf(Math.max(...avgCycleTimes));
   const bottleneck = analysis.machines[bottleneckIdx];
 
-  console.log('[Simulation] Complete');
-  console.log(`[Simulation] Average throughput: ${throughputStats.mean.toFixed(2)} parts/hour`);
-  console.log(`[Simulation] Bottleneck: ${bottleneck.id} (${bottleneck.cycle_time.mean.toFixed(1)} min cycle time)`);
+  safeLog('[Simulation] Complete');
+  safeLog(`[Simulation] Average throughput: ${throughputStats.mean.toFixed(2)} parts/hour`);
+  safeLog(`[Simulation] Bottleneck: ${bottleneck.id} (${bottleneck.cycle_time.mean.toFixed(1)} min cycle time)`);
 
   return {
     throughput: throughputStats,

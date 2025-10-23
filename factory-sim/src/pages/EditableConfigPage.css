@@ -1,0 +1,415 @@
+/* ============================================================================
+   EDITABLE CONFIGURATION PAGE STYLES
+   ============================================================================ */
+
+.editable-config-page {
+  min-height: 100vh;
+  background: var(--color-bg-primary, #0a0a0a);
+  color: var(--color-text-primary, #fff);
+  padding-bottom: 60px;
+}
+
+/* Header
+   ========================================================================== */
+
+.config-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--color-bg-secondary, #111);
+  border-bottom: 1px solid var(--color-border, #2a2a2a);
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.config-header__title h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  font-family: var(--font-mono, monospace);
+}
+
+.config-header__subtitle {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #a0a0a0);
+}
+
+.config-header__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Buttons
+   ========================================================================== */
+
+.config-btn {
+  padding: 0.625rem 1.25rem;
+  border: 1px solid var(--color-border-light, #404040);
+  background: transparent;
+  color: var(--color-text-primary, #fff);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-family: var(--font-mono, monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.config-btn:hover {
+  background: var(--color-bg-tertiary, #1a1a1a);
+  border-color: var(--color-text-primary, #fff);
+}
+
+.config-btn--primary {
+  background: var(--color-text-primary, #fff);
+  color: var(--color-bg-primary, #0a0a0a);
+  border-color: var(--color-text-primary, #fff);
+}
+
+.config-btn--primary:hover {
+  background: #e0e0e0;
+  border-color: #e0e0e0;
+}
+
+.config-btn--secondary {
+  background: transparent;
+  border-color: var(--color-border-light, #404040);
+}
+
+.config-btn--danger {
+  background: transparent;
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.config-btn--danger:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+.config-btn--small {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+/* Navigation Tabs
+   ========================================================================== */
+
+.config-nav {
+  position: sticky;
+  top: 80px;
+  z-index: 99;
+  background: var(--color-bg-secondary, #111);
+  border-bottom: 1px solid var(--color-border, #2a2a2a);
+  padding: 0 2rem;
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+}
+
+.config-nav__tab {
+  padding: 1rem 1.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-secondary, #a0a0a0);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: var(--font-mono, monospace);
+}
+
+.config-nav__tab:hover {
+  color: var(--color-text-primary, #fff);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.config-nav__tab.active {
+  color: var(--color-text-primary, #fff);
+  border-bottom-color: var(--color-text-primary, #fff);
+}
+
+/* Content Area
+   ========================================================================== */
+
+.config-content {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Editor Section
+   ========================================================================== */
+
+.editor-section {
+  background: var(--color-bg-secondary, #111);
+  border: 1px solid var(--color-border, #2a2a2a);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.editor-section h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  font-family: var(--font-mono, monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+  margin: 0;
+}
+
+.section-description {
+  margin: -0.5rem 0 1.5rem 0;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #a0a0a0);
+}
+
+/* Form Elements
+   ========================================================================== */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-tertiary, #808080);
+  font-family: var(--font-mono, monospace);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.75rem;
+  background: var(--color-bg-primary, #0a0a0a);
+  border: 1px solid var(--color-border, #2a2a2a);
+  color: var(--color-text-primary, #fff);
+  font-size: 0.875rem;
+  font-family: var(--font-mono, monospace);
+  transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--color-text-primary, #fff);
+  background: var(--color-bg-tertiary, #1a1a1a);
+}
+
+.form-group input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.form-group input[type="number"]::-webkit-inner-spin-button,
+.form-group input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.json-editor {
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+/* Items List
+   ========================================================================== */
+
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.item-card {
+  background: var(--color-bg-primary, #0a0a0a);
+  border: 1px solid var(--color-border, #2a2a2a);
+  transition: all 0.2s ease;
+}
+
+.item-card:hover {
+  border-color: var(--color-border-light, #404040);
+}
+
+.item-card__header {
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.item-card__header:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.item-card__header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--font-mono, monospace);
+}
+
+.item-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.expand-icon {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary, #a0a0a0);
+  transition: transform 0.2s ease;
+}
+
+.item-card__content {
+  padding: 1.5rem;
+  border-top: 1px solid var(--color-border, #2a2a2a);
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Empty State
+   ========================================================================== */
+
+.empty-state {
+  padding: 3rem;
+  text-align: center;
+  color: var(--color-text-secondary, #a0a0a0);
+  background: var(--color-bg-primary, #0a0a0a);
+  border: 1px dashed var(--color-border, #2a2a2a);
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* Status Bar
+   ========================================================================== */
+
+.config-status-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 101;
+  background: #f59e0b;
+  color: #000;
+  padding: 1rem 2rem;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  font-family: var(--font-mono, monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Responsive
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .config-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .config-header__actions {
+    justify-content: stretch;
+  }
+
+  .config-btn {
+    flex: 1;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .config-nav {
+    padding: 0 1rem;
+  }
+
+  .config-content {
+    padding: 1rem;
+  }
+
+  .editor-section {
+    padding: 1rem;
+  }
+}
+
+/* Scrollbar
+   ========================================================================== */
+
+.config-nav::-webkit-scrollbar {
+  height: 4px;
+}
+
+.config-nav::-webkit-scrollbar-track {
+  background: var(--color-bg-primary, #0a0a0a);
+}
+
+.config-nav::-webkit-scrollbar-thumb {
+  background: var(--color-border-light, #404040);
+}
+
+.config-nav::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary, #a0a0a0);
+}

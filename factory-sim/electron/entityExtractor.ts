@@ -1,4 +1,5 @@
 import { ExtractedSystem, ExtractionResult } from '../src/types/extraction';
+import { safeLog, safeError, safeWarn } from './safeConsole.js';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 const MODEL = 'gpt-4o'; // GPT-4o for complex extraction
@@ -440,15 +441,15 @@ export async function extractSystemFromDocument(
   const API_KEY = getAPIKey(); // Read API key at runtime
 
   if (!API_KEY) {
-    console.error('[Extractor] OPENAI_API_KEY is not set in process.env');
-    console.error('[Extractor] Available env vars:', Object.keys(process.env).filter(k => k.includes('API')));
+    safeError('[Extractor] OPENAI_API_KEY is not set in process.env');
+    safeError('[Extractor] Available env vars:', Object.keys(process.env).filter(k => k.includes('API')));
     throw new Error('OPENAI_API_KEY not configured in .env file');
   }
 
-  console.log('[Extractor] Starting extraction with GPT-4-Turbo...');
-  console.log('[Extractor] API key available:', API_KEY.length, 'chars');
-  console.log('[Extractor] Content length:', documentContent.length);
-  console.log('[Extractor] Document type:', documentType);
+  safeLog('[Extractor] Starting extraction with GPT-4-Turbo...');
+  safeLog('[Extractor] API key available:', API_KEY.length, 'chars');
+  safeLog('[Extractor] Content length:', documentContent.length);
+  safeLog('[Extractor] Document type:', documentType);
 
   const request: OpenAIRequest = {
     model: MODEL,
@@ -489,18 +490,18 @@ You ALWAYS extract comprehensive data and return valid JSON matching the exact s
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('[Extractor] OpenAI error:', errorText);
+      safeError('[Extractor] OpenAI error:', errorText);
       throw new Error(`OpenAI API error: ${response.status}`);
     }
 
     const data = await response.json() as OpenAIResponse;
-    console.log('[Extractor] Response received');
-    console.log('[Extractor] Tokens used:', data.usage.total_tokens);
+    safeLog('[Extractor] Response received');
+    safeLog('[Extractor] Tokens used:', data.usage.total_tokens);
 
     const responseText = data.choices[0]?.message?.content || '';
     const extracted = extractJSON(responseText);
 
-    console.log('[Extractor] Extracted:', 
+    safeLog('[Extractor] Extracted:',
       extracted.entities?.length || 0, 'entities,',
       extracted.resources?.length || 0, 'resources,',
       extracted.processes?.length || 0, 'processes'
@@ -508,13 +509,13 @@ You ALWAYS extract comprehensive data and return valid JSON matching the exact s
 
     // Validate we got something
     if (!extracted.entities || extracted.entities.length === 0) {
-      console.warn('[Extractor] Warning: No entities extracted');
+      safeWarn('[Extractor] Warning: No entities extracted');
     }
     if (!extracted.resources || extracted.resources.length === 0) {
-      console.warn('[Extractor] Warning: No resources extracted');
+      safeWarn('[Extractor] Warning: No resources extracted');
     }
     if (!extracted.processes || extracted.processes.length === 0) {
-      console.warn('[Extractor] Warning: No processes extracted');
+      safeWarn('[Extractor] Warning: No processes extracted');
     }
 
     return {
@@ -527,7 +528,7 @@ You ALWAYS extract comprehensive data and return valid JSON matching the exact s
       }
     };
   } catch (error) {
-    console.error('[Extractor] Extraction failed:', error);
+    safeError('[Extractor] Extraction failed:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

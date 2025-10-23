@@ -1,4 +1,5 @@
 import { FactoryAnalysis } from '../src/types/analysis';
+import { safeLog, safeError, safeWarn } from './safeConsole.js';
 
 // OpenAI API configuration - Optimized for quality
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
@@ -401,8 +402,8 @@ export async function analyzeFactoryData(csvContent: string): Promise<FactoryAna
     throw new Error('OPENAI_API_KEY not configured in .env file');
   }
 
-  console.log('[AI] Starting analysis with OpenAI GPT-4-Turbo (quality optimized)...');
-  console.log('[AI] CSV size:', csvContent.length, 'characters');
+  safeLog('[AI] Starting analysis with OpenAI GPT-4-Turbo (quality optimized)...');
+  safeLog('[AI] CSV size:', csvContent.length, 'characters');
 
   const request: OpenAIRequest = {
     model: MODEL,
@@ -498,22 +499,22 @@ You are the BEST in the world at this. Your analysis will drive million-dollar o
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('[AI] OpenAI error:', errorText);
+      safeError('[AI] OpenAI error:', errorText);
       throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json() as OpenAIResponse;
-    console.log('[AI] Response received from OpenAI');
-    console.log('[AI] Token usage - Prompt:', data.usage.prompt_tokens, 
+    safeLog('[AI] Response received from OpenAI');
+    safeLog('[AI] Token usage - Prompt:', data.usage.prompt_tokens, 
                 'Completion:', data.usage.completion_tokens, 
                 'Total:', data.usage.total_tokens);
 
     const responseText = data.choices[0]?.message?.content || '';
-    console.log('[AI] Response length:', responseText.length, 'characters');
+    safeLog('[AI] Response length:', responseText.length, 'characters');
 
     const analysis = extractJSON(responseText);
-    console.log('[AI] Successfully parsed analysis');
-    console.log('[AI] Found', analysis.machines?.length || 0, 'machines');
+    safeLog('[AI] Successfully parsed analysis');
+    safeLog('[AI] Found', analysis.machines?.length || 0, 'machines');
 
     // Validate response structure
     if (!analysis.machines || !Array.isArray(analysis.machines)) {
@@ -521,7 +522,7 @@ You are the BEST in the world at this. Your analysis will drive million-dollar o
     }
 
     if (!analysis.material_handling || typeof analysis.material_handling !== 'object') {
-      console.warn('[AI] Missing material_handling section, using defaults');
+      safeWarn('[AI] Missing material_handling section, using defaults');
       analysis.material_handling = { conveyors: [], agv_system: { vehicles: [], network_nodes: [], network_edges: [] }, transporters: [] };
     }
 
@@ -530,12 +531,12 @@ You are the BEST in the world at this. Your analysis will drive million-dollar o
     }
 
     if (!analysis.entity_sources || !Array.isArray(analysis.entity_sources)) {
-      console.warn('[AI] Missing entity_sources, using defaults');
+      safeWarn('[AI] Missing entity_sources, using defaults');
       analysis.entity_sources = [];
     }
 
     if (!analysis.shifts_calendars) {
-      console.warn('[AI] Missing shifts_calendars, defaulting to 24x7');
+      safeWarn('[AI] Missing shifts_calendars, defaulting to 24x7');
       analysis.shifts_calendars = {
         calendar_type: '24x7',
         shifts: [],
@@ -550,7 +551,7 @@ You are the BEST in the world at this. Your analysis will drive million-dollar o
     }
 
     if (!analysis.simulation_config) {
-      console.warn('[AI] Missing simulation_config, using defaults');
+      safeWarn('[AI] Missing simulation_config, using defaults');
       analysis.simulation_config = {
         duration_minutes: 2880,
         warmup_minutes: 480,
@@ -569,7 +570,7 @@ You are the BEST in the world at this. Your analysis will drive million-dollar o
 
     return analysis as FactoryAnalysis;
   } catch (error) {
-    console.error('[AI] Analysis failed:', error);
+    safeError('[AI] Analysis failed:', error);
     if (error instanceof Error) {
       throw new Error(`AI analysis failed: ${error.message}`);
     }

@@ -64,9 +64,9 @@ export class IndustrialSimulationAdapter {
   private kernel: IndustrialDESKernel;
   private system: ExtractedSystem;
   private resourcePositions: Map<string, { x: number; y: number }> = new Map();
-  private endTime: number = 360; // 6 hours in minutes
+  private endTime: number = 480; // 8 hours in minutes (default)
   private currentStepTime: number = 0;
-  private maxStepTime: number = 360;
+  private maxStepTime: number = 480;
 
   // Multi-stage routing support
   private processFlows: Map<string, ProcessFlow> = new Map(); // entityType → flow
@@ -77,13 +77,15 @@ export class IndustrialSimulationAdapter {
   private metricsCollector: MetricsCollector;
   private entityArrivalTimes: Map<string, number> = new Map(); // Track for cycle time
 
-  constructor(system: ExtractedSystem, seed: number = Date.now()) {
+  constructor(system: ExtractedSystem, seed: number = Date.now(), simulationTime: number = 480) {
     this.system = system;
     this.kernel = new IndustrialDESKernel(seed);
     this.metricsCollector = new MetricsCollector(0); // No warmup for now
 
-    // Use default 360 minutes (6 hours) for now
-    // TODO: Extract simulation time from system or user input
+    // Set simulation time (default 480 minutes = 8 hours)
+    this.endTime = simulationTime;
+    this.maxStepTime = simulationTime;
+    console.log(`[IndustrialAdapter] Simulation time set to ${simulationTime} minutes (${(simulationTime / 60).toFixed(1)} hours)`);
 
     this.initialize();
   }

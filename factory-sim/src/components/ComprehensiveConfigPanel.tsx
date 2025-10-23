@@ -38,14 +38,14 @@ export function ComprehensiveConfigPanel({ system, onSystemUpdate }: Props) {
   const [validationReport, setValidationReport] = useState<any>(null);
 
   const sections: { id: ConfigSection; label: string; icon: string }[] = [
-    { id: 'arrivals', label: 'Arrival Patterns', icon: '📊' },
-    { id: 'resources', label: 'Resources & Servers', icon: '🏭' },
-    { id: 'processes', label: 'Process Logic', icon: '⚙️' },
-    { id: 'schedules', label: 'Work Schedules', icon: '📅' },
-    { id: 'data_tables', label: 'Data Tables', icon: '📋' },
-    { id: 'experiments', label: 'Experiments', icon: '🔬' },
-    { id: 'custom_elements', label: 'Custom Elements', icon: '🎯' },
-    { id: 'output_stats', label: 'Output Statistics', icon: '📈' },
+    { id: 'arrivals', label: 'Arrival Patterns', icon: '' },
+    { id: 'resources', label: 'Resources & Servers', icon: '' },
+    { id: 'processes', label: 'Process Logic', icon: '' },
+    { id: 'schedules', label: 'Work Schedules', icon: '' },
+    { id: 'data_tables', label: 'Data Tables', icon: '' },
+    { id: 'experiments', label: 'Experiments', icon: '' },
+    { id: 'custom_elements', label: 'Custom Elements', icon: '' },
+    { id: 'output_stats', label: 'Output Statistics', icon: '' },
   ];
 
   return (
@@ -96,32 +96,14 @@ export function ComprehensiveConfigPanel({ system, onSystemUpdate }: Props) {
             className="industrial-button industrial-button--accent"
             style={{ fontSize: '0.875rem', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', borderColor: '#10b981' }}
           >
-            ✓ VALIDATE
-          </button>
-          <button
-            onClick={() => {
-              const result = ConfigurationOptimizer.optimize(system, {
-                targetUtilization: 0.75,
-                ensureStability: true,
-                fixCriticalIssues: true,
-                optimizeBottlenecks: true
-              });
-              onSystemUpdate(system); // System is modified in place
-              setValidationReport(result.afterValidation);
-              setShowValidation(true);
-              ConfigurationOptimizer.printOptimizationReport(result);
-            }}
-            className="industrial-button industrial-button--accent"
-            style={{ fontSize: '0.875rem', background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', borderColor: '#f59e0b' }}
-          >
-            🎯 AUTO-OPTIMIZE
+            VALIDATE
           </button>
           <button
             onClick={() => setIsEditing(!isEditing)}
             className="industrial-button industrial-button--primary"
             style={{ fontSize: '0.875rem' }}
           >
-            {isEditing ? '✓ SAVE CHANGES' : '✎ EDIT MODE'}
+            {isEditing ? 'SAVE CHANGES' : 'EDIT MODE'}
           </button>
         </div>
       </div>
@@ -256,13 +238,21 @@ function ArrivalPatternsEditor({ system, onSystemUpdate, isEditing }: EditorProp
     // Reconfigure arrival pattern based on mode
     switch (mode) {
       case 'interarrival':
+        // Calculate proper parameters for exponential distribution
+        const arrivalRate = 30; // arrivals per hour
+        const meanInterarrivalMin = 60 / arrivalRate; // minutes between arrivals
+
         entity.arrivalPattern = {
           type: 'poisson',
-          rate: 30,
+          rate: arrivalRate,
           rateUnit: 'per_hour',
           interarrivalTime: {
             type: 'exponential',
-            parameters: { mean: 2 },
+            parameters: {
+              mean: meanInterarrivalMin,
+              mode: 0, // Mode of exponential is always 0
+              lambda: 1 / meanInterarrivalMin // Rate parameter
+            },
             unit: 'minutes'
           }
         };
@@ -278,9 +268,66 @@ function ArrivalPatternsEditor({ system, onSystemUpdate, isEditing }: EditorProp
         };
         break;
       case 'arrival_table':
+        // Generate a realistic arrival table with specific times
+        const startTime = 0; // Start at simulation time 0
+
+        // Get simulation run length from config, default to 8 hours (480 minutes)
+        let endTimeMin = 480;
+        if (updatedSystem.simulationConfig) {
+          const runLength = updatedSystem.simulationConfig.runLength;
+          const unit = updatedSystem.simulationConfig.runLengthUnit;
+
+          switch (unit) {
+            case 'minutes':
+              endTimeMin = runLength;
+              break;
+            case 'hours':
+              endTimeMin = runLength * 60;
+              break;
+            case 'days':
+              endTimeMin = runLength * 24 * 60;
+              break;
+            case 'weeks':
+              endTimeMin = runLength * 7 * 24 * 60;
+              break;
+          }
+        }
+
+        const avgRate = entity.arrivalPattern?.rate || 30; // Use existing rate or default
+        const numArrivals = Math.floor((endTimeMin / 60) * avgRate);
+        const arrivalTable = [];
+
+        // Generate arrivals using exponential interarrival times
+        let currentTime = startTime;
+        const meanInterarrival = 60 / avgRate; // minutes between arrivals
+
+        for (let i = 0; i < numArrivals; i++) {
+          // Exponential interarrival time
+          const interarrival = -Math.log(1 - Math.random()) * meanInterarrival;
+          currentTime += interarrival;
+
+          if (currentTime >= endTimeMin) break;
+
+          arrivalTable.push({
+            time: parseFloat(currentTime.toFixed(2)),
+            entityType: entity.name,
+            quantity: 1,
+            attributes: {}
+          });
+        }
+
         entity.arrivalPattern = {
           type: 'scheduled',
-          schedule: []
+          schedule: arrivalTable,
+          interarrivalTime: {
+            type: 'exponential',
+            parameters: {
+              mean: meanInterarrival,
+              mode: 0,
+              lambda: 1 / meanInterarrival
+            },
+            unit: 'minutes'
+          }
         };
         break;
       case 'on_event':
@@ -301,7 +348,7 @@ function ArrivalPatternsEditor({ system, onSystemUpdate, isEditing }: EditorProp
   return (
     <div>
       <h3 style={{ color: 'var(--color-text-primary)', marginBottom: '15px', fontSize: '1rem' }}>
-        📊 Arrival Pattern Configuration (All 4 Simio Modes)
+        Arrival Pattern Configuration (All 4 Simio Modes)
       </h3>
 
       {/* Entity Selector */}
@@ -377,8 +424,8 @@ function ArrivalPatternsEditor({ system, onSystemUpdate, isEditing }: EditorProp
       }}>
         <h4 style={{ color: '#3b82f6', marginBottom: '15px', fontSize: '0.875rem' }}>
           {arrivalMode === 'interarrival' && '⏱️ Interarrival Time Configuration'}
-          {arrivalMode === 'rate_table' && '📊 Rate Table Configuration'}
-          {arrivalMode === 'arrival_table' && '📅 Arrival Table Configuration'}
+          {arrivalMode === 'rate_table' && 'Rate Table Configuration'}
+          {arrivalMode === 'arrival_table' && 'Arrival Table Configuration'}
           {arrivalMode === 'on_event' && '🎯 Event-Based Configuration'}
         </h4>
 
@@ -387,7 +434,44 @@ function ArrivalPatternsEditor({ system, onSystemUpdate, isEditing }: EditorProp
             <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: '15px' }}>
               Entities arrive with random interarrival times from a probability distribution.
             </p>
-            {/* Distribution selector would go here */}
+
+            {/* Current Distribution Display */}
+            {system.entities[selectedEntityIndex]?.arrivalPattern?.interarrivalTime && (
+              <div style={{
+                marginBottom: '15px',
+                padding: '15px',
+                backgroundColor: 'var(--color-bg-tertiary)',
+                borderRadius: '4px'
+              }}>
+                <h5 style={{ color: 'var(--color-primary)', marginBottom: '10px', fontSize: '0.8rem' }}>
+                  📊 Current Distribution
+                </h5>
+                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-primary)' }}>
+                  <div style={{ marginBottom: '8px' }}>
+                    <strong>Type:</strong> {system.entities[selectedEntityIndex].arrivalPattern.interarrivalTime.type}
+                  </div>
+                  <div style={{ marginBottom: '8px' }}>
+                    <strong>Mean:</strong> {system.entities[selectedEntityIndex].arrivalPattern.interarrivalTime.parameters?.mean?.toFixed(2) || 'N/A'} {system.entities[selectedEntityIndex].arrivalPattern.interarrivalTime.unit}
+                  </div>
+                  {system.entities[selectedEntityIndex].arrivalPattern.interarrivalTime.parameters?.mode !== undefined && (
+                    <div style={{ marginBottom: '8px' }}>
+                      <strong>Mode:</strong> {system.entities[selectedEntityIndex].arrivalPattern.interarrivalTime.parameters.mode.toFixed(2)} {system.entities[selectedEntityIndex].arrivalPattern.interarrivalTime.unit}
+                    </div>
+                  )}
+                  {system.entities[selectedEntityIndex].arrivalPattern.interarrivalTime.parameters?.lambda && (
+                    <div style={{ marginBottom: '8px' }}>
+                      <strong>Lambda (rate):</strong> {system.entities[selectedEntityIndex].arrivalPattern.interarrivalTime.parameters.lambda.toFixed(4)} per {system.entities[selectedEntityIndex].arrivalPattern.interarrivalTime.unit}
+                    </div>
+                  )}
+                  {system.entities[selectedEntityIndex].arrivalPattern?.rate && (
+                    <div style={{ marginBottom: '8px' }}>
+                      <strong>Arrival Rate:</strong> {system.entities[selectedEntityIndex].arrivalPattern.rate} {system.entities[selectedEntityIndex].arrivalPattern.rateUnit}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
               ✓ 20+ Distributions Supported: Exponential, Normal, Uniform, Triangular, Lognormal, Gamma, Beta, Weibull, Erlang, PERT, Binomial, Geometric, and more
             </div>
@@ -412,12 +496,72 @@ function ArrivalPatternsEditor({ system, onSystemUpdate, isEditing }: EditorProp
             <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: '15px' }}>
               Arrivals occur at specific DateTime values from a table, with optional stochastic deviations.
             </p>
-            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginBottom: '15px' }}>
               ✓ Exact arrival times with random deviations<br/>
               ✓ No-show probability modeling<br/>
               ✓ Entity type and attributes per arrival<br/>
               ✓ Perfect for appointments and scheduled operations
             </div>
+
+            {/* Display current arrival table */}
+            {system.entities[selectedEntityIndex]?.arrivalPattern?.schedule &&
+             Array.isArray(system.entities[selectedEntityIndex].arrivalPattern.schedule) &&
+             system.entities[selectedEntityIndex].arrivalPattern.schedule.length > 0 && (
+              <div style={{
+                marginTop: '15px',
+                padding: '15px',
+                backgroundColor: 'var(--color-bg-tertiary)',
+                borderRadius: '4px',
+                maxHeight: '300px',
+                overflowY: 'auto'
+              }}>
+                <h5 style={{ color: 'var(--color-primary)', marginBottom: '10px', fontSize: '0.8rem' }}>
+                  📅 Arrival Schedule ({system.entities[selectedEntityIndex].arrivalPattern.schedule.length} arrivals)
+                </h5>
+                <table style={{
+                  width: '100%',
+                  fontSize: '0.7rem',
+                  borderCollapse: 'collapse',
+                  color: 'var(--color-text-primary)'
+                }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                      <th style={{ padding: '8px', textAlign: 'left' }}>#</th>
+                      <th style={{ padding: '8px', textAlign: 'left' }}>Time (min)</th>
+                      <th style={{ padding: '8px', textAlign: 'left' }}>Entity</th>
+                      <th style={{ padding: '8px', textAlign: 'left' }}>Qty</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {system.entities[selectedEntityIndex].arrivalPattern.schedule.slice(0, 50).map((arrival: any, idx: number) => (
+                      <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                        <td style={{ padding: '6px' }}>{idx + 1}</td>
+                        <td style={{ padding: '6px' }}>{arrival.time}</td>
+                        <td style={{ padding: '6px' }}>{arrival.entityType || 'Entity'}</td>
+                        <td style={{ padding: '6px' }}>{arrival.quantity || 1}</td>
+                      </tr>
+                    ))}
+                    {system.entities[selectedEntityIndex].arrivalPattern.schedule.length > 50 && (
+                      <tr>
+                        <td colSpan={4} style={{ padding: '8px', textAlign: 'center', fontStyle: 'italic', color: 'var(--color-text-secondary)' }}>
+                          ... and {system.entities[selectedEntityIndex].arrivalPattern.schedule.length - 50} more arrivals
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+
+                {/* Show distribution info */}
+                {system.entities[selectedEntityIndex].arrivalPattern.interarrivalTime && (
+                  <div style={{ marginTop: '15px', fontSize: '0.7rem', color: 'var(--color-text-secondary)' }}>
+                    <strong>Interarrival Time Distribution:</strong> {system.entities[selectedEntityIndex].arrivalPattern.interarrivalTime.type}
+                    {system.entities[selectedEntityIndex].arrivalPattern.interarrivalTime.parameters?.mean && (
+                      <span> (mean: {system.entities[selectedEntityIndex].arrivalPattern.interarrivalTime.parameters.mean.toFixed(2)} {system.entities[selectedEntityIndex].arrivalPattern.interarrivalTime.unit})</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -484,7 +628,7 @@ function ResourcesEditor({ system }: EditorProps) {
   return (
     <div>
       <h3 style={{ color: 'var(--color-text-primary)', marginBottom: '15px', fontSize: '1rem' }}>
-        🏭 Resources & Server Configuration
+        Resources & Server Configuration
       </h3>
       <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
         Configure all resource properties: capacity, processing times, setup/teardown, secondary resources, costs, and more.
@@ -595,7 +739,7 @@ function ProcessLogicEditor(): JSX.Element {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div>
           <h3 style={{ color: 'var(--color-text-primary)', margin: 0, fontSize: '1rem' }}>
-            ⚙️ Process Logic & Custom Steps
+            Process Logic & Custom Steps
           </h3>
           <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', margin: '5px 0 0 0' }}>
             Build process flows by clicking steps below. Drag to reorder.
@@ -628,7 +772,7 @@ function ProcessLogicEditor(): JSX.Element {
           border: '2px solid var(--color-primary)'
         }}>
           <h4 style={{ color: 'var(--color-primary)', marginBottom: '15px', fontSize: '0.875rem' }}>
-            📋 CURRENT PROCESS FLOW ({processSteps.length} steps)
+            CURRENT PROCESS FLOW ({processSteps.length} steps)
           </h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {processSteps.map((step, index) => (
@@ -763,7 +907,7 @@ function WorkSchedulesEditor(): JSX.Element {
   return (
     <div>
       <h3 style={{ color: 'var(--color-text-primary)', marginBottom: '15px', fontSize: '1rem' }}>
-        📅 Work Schedules & Calendars
+        Work Schedules & Calendars
       </h3>
       <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
         Configure shift patterns, breaks, holidays, and exception calendars.
@@ -803,7 +947,7 @@ function WorkSchedulesEditor(): JSX.Element {
         fontSize: '0.75rem',
         color: 'var(--color-text-secondary)'
       }}>
-        <strong style={{ color: '#3b82f6' }}>📋 Schedule Features:</strong>
+        <strong style={{ color: '#3b82f6' }}>Schedule Features:</strong>
         <ul style={{ margin: '10px 0 0 20px', paddingLeft: 0 }}>
           <li>Multiple day patterns with repeat cycles</li>
           <li>Break periods with automatic resume</li>
@@ -824,7 +968,7 @@ function DataTablesEditor(): JSX.Element {
   return (
     <div>
       <h3 style={{ color: 'var(--color-text-primary)', marginBottom: '15px', fontSize: '1rem' }}>
-        📋 Data Tables (All Types)
+        Data Tables (All Types)
       </h3>
       <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
         Full editing capability for all Simio data table types.
@@ -1008,7 +1152,7 @@ function CustomElementsEditor(): JSX.Element {
           border: '2px solid #f59e0b',
           borderRadius: '6px'
         }}>
-          <h4 style={{ color: '#f59e0b', marginBottom: '15px', fontSize: '0.875rem' }}>📊 Statistics</h4>
+          <h4 style={{ color: '#f59e0b', marginBottom: '15px', fontSize: '0.875rem' }}>Statistics</h4>
           <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
             <li>Tally Statistics (observational)</li>
             <li>Output Statistics (performance metrics)</li>
@@ -1023,7 +1167,7 @@ function CustomElementsEditor(): JSX.Element {
           border: '2px solid #ef4444',
           borderRadius: '6px'
         }}>
-          <h4 style={{ color: '#ef4444', marginBottom: '15px', fontSize: '0.875rem' }}>⚙️ Functions</h4>
+          <h4 style={{ color: '#ef4444', marginBottom: '15px', fontSize: '0.875rem' }}>Functions</h4>
           <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
             <li>User-defined functions</li>
             <li>Lookup functions (table-based)</li>
@@ -1044,7 +1188,7 @@ function OutputStatisticsEditor(): JSX.Element {
   return (
     <div>
       <h3 style={{ color: 'var(--color-text-primary)', marginBottom: '15px', fontSize: '1rem' }}>
-        📈 Output Statistics & Results
+        Output Statistics & Results
       </h3>
       <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
         Configure output statistics, pivot grids, dashboards, and SMORE plots.
@@ -1057,7 +1201,7 @@ function OutputStatisticsEditor(): JSX.Element {
         borderRadius: '6px'
       }}>
         <h4 style={{ color: 'var(--color-primary)', marginBottom: '15px', fontSize: '0.875rem' }}>
-          📊 Automatic Statistics
+          Automatic Statistics
         </h4>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', fontSize: '0.75rem' }}>
           {[
@@ -1096,7 +1240,7 @@ function OutputStatisticsEditor(): JSX.Element {
         fontSize: '0.75rem',
         color: 'var(--color-text-secondary)'
       }}>
-        <strong style={{ color: '#3b82f6' }}>📋 Results Display Options:</strong>
+        <strong style={{ color: '#3b82f6' }}>Results Display Options:</strong>
         <ul style={{ margin: '10px 0 0 20px', paddingLeft: 0 }}>
           <li>Pivot Grid (fully customizable views, filtering, sorting, grouping)</li>
           <li>Reports (formatted output with custom templates)</li>
