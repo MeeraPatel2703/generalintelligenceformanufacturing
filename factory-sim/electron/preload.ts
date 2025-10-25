@@ -52,6 +52,16 @@ export interface ComprehensiveSimulationResult {
   error?: string
 }
 
+export interface ParserResult {
+  success: boolean
+  processGraph?: any
+  validation?: any
+  error?: string
+  repairAttempts?: number
+  warnings?: string[]
+  metadata?: any
+}
+
 export interface ElectronAPI {
   openFileDialog: () => Promise<FileDialogResult>
   openDocumentDialog: () => Promise<FileDialogResult>
@@ -66,6 +76,10 @@ export interface ElectronAPI {
   parseDocument: (filePath: string) => Promise<DocumentParseResult & { success: boolean }>
   extractSystem: (documentContent: string, documentType: 'pdf' | 'word' | 'text') => Promise<SystemExtractionResult>
   getDocumentInfo: (filePath: string) => Promise<DocumentInfo>
+
+  // DES Parser APIs (new)
+  parseText: (text: string) => Promise<ParserResult>
+  parseDocumentToDES: (filePath: string) => Promise<ParserResult>
 
   // Comprehensive simulation with advanced analysis
   runComprehensiveSimulation: (extractedSystemOrAnalysis: any, numReplications?: number) => Promise<ComprehensiveSimulationResult>
@@ -112,6 +126,14 @@ const electronAPI = {
   },
   getDocumentInfo: (filePath: string): Promise<DocumentInfo> => {
     return ipcRenderer.invoke('document:info', filePath)
+  },
+
+  // DES Parser APIs
+  parseText: (text: string): Promise<ParserResult> => {
+    return ipcRenderer.invoke('des-parser:parse-text', text)
+  },
+  parseDocumentToDES: (filePath: string): Promise<ParserResult> => {
+    return ipcRenderer.invoke('des-parser:parse-document', filePath)
   },
 
   // Comprehensive simulation with advanced analysis
