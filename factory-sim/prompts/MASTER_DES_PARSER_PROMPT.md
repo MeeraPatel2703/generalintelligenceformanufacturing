@@ -45,25 +45,46 @@ No comments, no prose, no markdown — just the tool call.
 
 ---
 
-## 🧩 DATA MODEL OVERVIEW
+## 🧩 DATA MODEL OVERVIEW (22 SECTIONS)
 
-### 1. Entities
+### Section 0: Global / Provenance
+
+```json
+{
+  "metadata": {
+    "model_id": "FactoryModel",
+    "version": "1.0",
+    "created": "2025-01-15T10:30:00Z",
+    "description": "Manufacturing system with 5 stations",
+    "author": "System Parser",
+    "source_document": "spec.pdf",
+    "missing": ["sunday_arrival_rate"],
+    "assumptions": ["Assumed FIFO where not specified"]
+  }
+}
+```
+
+### Section 1: Entities
 
 ```json
 {
   "id": "Tray",
   "batchSize": 1,
   "class": "Product",
-  "attributes": [],
-  "priority": 0
+  "attributes": [
+    {"name": "priority", "type": "number", "default": 0},
+    {"name": "due_date", "type": "datetime", "default": null}
+  ],
+  "priority": 0,
+  "cost_per_unit": 25.0
 }
 ```
 
-### 2. Arrivals
+### Section 2: Arrivals
 
 Supports `poisson`, `schedule_table`, `empirical`, or `orders`.
 
-**Poisson Example:**
+**Poisson Example (Rate Tables):**
 ```json
 {
   "policy": "poisson",
@@ -95,7 +116,28 @@ Supports `poisson`, `schedule_table`, `empirical`, or `orders`.
 }
 ```
 
-### 3. Distributions
+### Section 3: Calendars / Shifts
+
+```json
+{
+  "id": "DayShift",
+  "description": "Standard day shift with breaks",
+  "shifts": [
+    {"day": "Mon", "start": "08:00", "end": "16:00"},
+    {"day": "Tue", "start": "08:00", "end": "16:00"},
+    {"day": "Wed", "start": "08:00", "end": "16:00"},
+    {"day": "Thu", "start": "08:00", "end": "16:00"},
+    {"day": "Fri", "start": "08:00", "end": "16:00"}
+  ],
+  "breaks": [
+    {"offset_min": 120, "duration_min": 15, "name": "Morning Break"},
+    {"offset_min": 240, "duration_min": 30, "name": "Lunch"}
+  ],
+  "holidays": ["2025-01-01", "2025-07-04", "2025-12-25"]
+}
+```
+
+### Section 4: Distributions
 
 Canonical forms:
 
@@ -123,7 +165,7 @@ Canonical forms:
 }
 ```
 
-### 4. Stations / Machines
+### Section 5: Stations / Machines
 
 Include queue, capacity, operators, setup, downtime, rework, yield.
 
@@ -179,7 +221,107 @@ Include queue, capacity, operators, setup, downtime, rework, yield.
 - `SLACK` - Slack time remaining
 - `PRIORITY` - Priority-based
 
-### 5. Routes / Transports
+### Section 6: Setups / Changeovers
+
+**Cadence Setup (every N parts):**
+```json
+{
+  "mode": "cadence",
+  "cadence": {
+    "every_n": 20,
+    "time": {"type": "constant", "params": {"value": 15}, "units": "minutes"}
+  }
+}
+```
+
+**Class-Based Setup:**
+```json
+{
+  "mode": "class_based",
+  "class_based": {
+    "matrix": {
+      "A": {
+        "A": {"type": "constant", "params": {"value": 0}, "units": "minutes"},
+        "B": {"type": "constant", "params": {"value": 10}, "units": "minutes"}
+      },
+      "B": {
+        "A": {"type": "constant", "params": {"value": 5}, "units": "minutes"},
+        "B": {"type": "constant", "params": {"value": 0}, "units": "minutes"}
+      }
+    }
+  }
+}
+```
+
+**Sequence-Dependent Setup:**
+```json
+{
+  "mode": "sequence_dependent",
+  "sequence_dependent": {
+    "sequence_matrix": {
+      "from_A_to_B": {"type": "triangular", "params": {"min": 5, "mode": 10, "max": 15}, "units": "minutes"},
+      "from_B_to_A": {"type": "triangular", "params": {"min": 8, "mode": 12, "max": 18}, "units": "minutes"}
+    }
+  }
+}
+```
+
+### Section 7: Quality / Rework / Scrap
+
+```json
+{
+  "id": "Inspection",
+  "kind": "machine",
+  "rework": {
+    "probability": 0.08,
+    "to": "Machining",
+    "delay": {"type": "constant", "params": {"value": 5}, "units": "minutes"}
+  },
+  "scrap": {
+    "probability": 0.02,
+    "cost_per_unit": 50.0
+  },
+  "yield": 0.90,
+  "quality_level": 0.95
+}
+```
+
+### Section 8: Failures / Downtime / Maintenance
+
+**Time-Based Failures (MTBF/MTTR):**
+```json
+{
+  "type": "time_based",
+  "mtbf": {"type": "exponential", "params": {"mean": 480}, "units": "minutes"},
+  "mttr": {"type": "triangular", "params": {"min": 30, "mode": 45, "max": 90}, "units": "minutes"}
+}
+```
+
+**Count-Based Failures:**
+```json
+{
+  "type": "count_based",
+  "parts_between_failures": {"type": "normal", "params": {"mean": 1000, "stdev": 100}},
+  "repair_time": {"type": "lognormal", "params": {"mu": 3.5, "sigma": 0.8}, "units": "minutes"}
+}
+```
+
+**Planned Maintenance:**
+```json
+{
+  "planned_maintenance": [
+    {
+      "schedule": "weekly",
+      "day": "Sat",
+      "start": "08:00",
+      "duration_min": 120,
+      "description": "Weekly preventive maintenance"
+    }
+  ]
+}
+```
+
+### Section 9: Routes / Transports
 
 ```json
 {
@@ -208,7 +350,7 @@ Include queue, capacity, operators, setup, downtime, rework, yield.
 - `agv` - Automated guided vehicle
 - `transporter` - Forklift, truck, crane
 
-### 6. Resources / Pools
+### Section 10: Resources / Pools
 
 ```json
 {
@@ -226,32 +368,114 @@ Include queue, capacity, operators, setup, downtime, rework, yield.
 - `tool` - Equipment, fixtures
 - `vehicle` - AGVs, forklifts
 
-### 7. Calendars / Shifts
+### Section 11: Buffers / Storage
 
 ```json
 {
-  "id": "DayShift",
-  "shifts": [
-    {
-      "day": "Mon",
-      "start": "08:00",
-      "end": "16:00"
-    },
-    {
-      "day": "Tue",
-      "start": "08:00",
-      "end": "16:00"
-    }
-  ],
-  "breaks": [
-    {"offset_min": 120, "duration_min": 15},
-    {"offset_min": 240, "duration_min": 30}
-  ],
-  "holidays": ["2025-01-01", "2025-07-04", "2025-12-25"]
+  "id": "BufferZone",
+  "kind": "buffer",
+  "capacity": 50,
+  "queue": "FIFO",
+  "blocking": {
+    "enabled": true,
+    "upstream_stations": ["Machining", "Assembly"]
+  },
+  "storage_cost_per_unit_per_hour": 0.5
 }
 ```
 
-### 8. Experiments
+### Section 12: WIP Control
+
+**CONWIP (Constant Work In Process):**
+```json
+{
+  "type": "conwip",
+  "limit": 25,
+  "scope": ["Machining", "Assembly", "Inspection"],
+  "policy": "block_upstream"
+}
+```
+
+**Kanban:**
+```json
+{
+  "type": "kanban",
+  "cards": 10,
+  "stations": ["Assembly"],
+  "replenishment_point": 3
+}
+```
+
+### Section 13: Control Logic
+
+```json
+{
+  "id": "RoutingLogic1",
+  "type": "conditional",
+  "condition": "if entity.priority > 5 then route_to Expedite else route_to Normal",
+  "triggers": [
+    {"event": "entity_arrival", "action": "check_priority"},
+    {"event": "station_full", "action": "reroute_to_buffer"}
+  ]
+}
+```
+
+### Section 14: Statistics / KPIs
+
+```json
+{
+  "kpis": [
+    {
+      "name": "throughput",
+      "type": "rate",
+      "units": "entities/hour",
+      "target": 25.0
+    },
+    {
+      "name": "utilization",
+      "type": "percentage",
+      "scope": ["Machining", "Assembly"],
+      "target": 0.85
+    },
+    {
+      "name": "cycle_time",
+      "type": "time",
+      "units": "minutes",
+      "percentile": 95,
+      "target": 120
+    },
+    {
+      "name": "queue_length",
+      "type": "count",
+      "scope": ["Machining"],
+      "target": 5
+    },
+    {
+      "name": "wip",
+      "type": "count",
+      "target": 30
+    }
+  ]
+}
+```
+
+### Section 15: Run Configuration
+
+```json
+{
+  "runLength_min": 480,
+  "warmup_min": 30,
+  "replications": 30,
+  "confidence": 95,
+  "random_seed": 12345,
+  "stop_conditions": [
+    {"type": "max_entities", "value": 10000},
+    {"type": "steady_state", "threshold": 0.01}
+  ]
+}
+```
+
+### Section 16: Experiments / DOE
 
 ```json
 {

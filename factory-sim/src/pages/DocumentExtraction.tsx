@@ -168,10 +168,26 @@ export function DocumentExtraction() {
   };
 
   const handleSaveConfig = (updatedSystem: ExtractedSystem) => {
-    console.log('[DocumentExtraction] Saving updated configuration');
+    console.log('[DocumentExtraction] ✅ handleSaveConfig called');
+    console.log('[DocumentExtraction] Updated system:', updatedSystem);
+
     setExtractedSystem(updatedSystem);
+    console.log('[DocumentExtraction] ✅ setExtractedSystem done');
+
     setDESSystem(updatedSystem);
+    console.log('[DocumentExtraction] ✅ setDESSystem done');
+
     setShowEditConfig(false);
+    console.log('[DocumentExtraction] ✅ setShowEditConfig(false) done');
+
+    // Navigate to simulation page after saving
+    console.log('[DocumentExtraction] 🚀 About to navigate to /simulation in 100ms...');
+    setTimeout(() => {
+      console.log('[DocumentExtraction] 🚀 NAVIGATING NOW to /simulation');
+      console.log('[DocumentExtraction] Current hash before:', window.location.hash);
+      window.location.hash = '/simulation';
+      console.log('[DocumentExtraction] Current hash after:', window.location.hash);
+    }, 100);
   };
 
   const handleCancelConfig = () => {

@@ -280,26 +280,30 @@ function generateFlowEdgesFromSystem(system: ExtractedSystem | null): Edge[] {
   }
 
   // Step 3: If we have processes with conditions, create conditional edges
-  system.processes.forEach((process, processIdx) => {
-    process.sequence.forEach((step, stepIdx) => {
-      if (step.conditions && step.conditions.length > 0) {
-        step.conditions.forEach((condition, condIdx) => {
-          // Find matching resource or decision node
-          const targetId = condition.nextStepId || `resource-${(stepIdx + 1) % system.resources.length}`;
+  if (system.processes && Array.isArray(system.processes)) {
+    system.processes.forEach((process, processIdx) => {
+      if (process && process.sequence && Array.isArray(process.sequence)) {
+        process.sequence.forEach((step, stepIdx) => {
+          if (step && step.conditions && step.conditions.length > 0) {
+            step.conditions.forEach((condition, condIdx) => {
+              // Find matching resource or decision node
+              const targetId = condition.nextStepId || `resource-${(stepIdx + 1) % system.resources.length}`;
 
-          edges.push({
-            id: `edge-process-${processIdx}-step-${stepIdx}-${condIdx}`,
-            source: `resource-${stepIdx}`,
-            target: targetId,
-            type: 'smoothstep',
-            label: condition.probability ? `${(condition.probability * 100).toFixed(0)}%` : '',
-            animated: true,
-            markerEnd: { type: 'arrowclosed' as any },
-          });
+              edges.push({
+                id: `edge-process-${processIdx}-step-${stepIdx}-${condIdx}`,
+                source: `resource-${stepIdx}`,
+                target: targetId,
+                type: 'smoothstep',
+                label: condition.probability ? `${(condition.probability * 100).toFixed(0)}%` : '',
+                animated: true,
+                markerEnd: { type: 'arrowclosed' as any },
+              });
+            });
+          }
         });
       }
     });
-  });
+  }
 
   return edges;
 }
@@ -321,12 +325,17 @@ export class ${toCamelCase(system.systemName)}Simulation extends SimulationEngin
   // ENTITIES
   // ============================================================================
 
-${system.entities.map((entity, idx) => `  // ${entity.name}
+${system.entities.map((entity, idx) => {
+    const arrivalPattern = entity.arrivalPattern || { type: 'constant', rate: 1 };
+    const arrivalPatternStr = JSON.stringify(arrivalPattern, null, 4);
+    const formattedPattern = arrivalPatternStr ? arrivalPatternStr.split('\n').join('\n    ') : '{}';
+    return `  // ${entity.name || 'Entity'}
   private entity_${idx} = {
-    name: '${entity.name}',
-    type: '${entity.type}',
-    arrivalPattern: ${JSON.stringify(entity.arrivalPattern, null, 4).split('\n').join('\n    ')},
-  };`).join('\n\n')}
+    name: '${entity.name || 'Entity'}',
+    type: '${entity.type || 'Part'}',
+    arrivalPattern: ${formattedPattern},
+  };`;
+  }).join('\n\n')}
 
   // ============================================================================
   // RESOURCES

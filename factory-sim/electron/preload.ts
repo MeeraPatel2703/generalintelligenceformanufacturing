@@ -80,6 +80,13 @@ export interface ElectronAPI {
   // DES Parser APIs (new)
   parseText: (text: string) => Promise<ParserResult>
   parseDocumentToDES: (filePath: string) => Promise<ParserResult>
+  processNlpEdit: (request: { currentGraph: any; nlpCommand: string }) => Promise<{
+    success: boolean;
+    updatedGraph?: any;
+    message?: string;
+    changes?: string[];
+    error?: string;
+  }>
 
   // Comprehensive simulation with advanced analysis
   runComprehensiveSimulation: (extractedSystemOrAnalysis: any, numReplications?: number) => Promise<ComprehensiveSimulationResult>
@@ -134,6 +141,9 @@ const electronAPI = {
   },
   parseDocumentToDES: (filePath: string): Promise<ParserResult> => {
     return ipcRenderer.invoke('des-parser:parse-document', filePath)
+  },
+  processNlpEdit: (request: { currentGraph: any; nlpCommand: string }): Promise<any> => {
+    return ipcRenderer.invoke('des-parser:process-nlp-edit', request)
   },
 
   // Comprehensive simulation with advanced analysis

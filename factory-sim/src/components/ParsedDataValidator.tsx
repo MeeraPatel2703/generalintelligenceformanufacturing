@@ -18,9 +18,26 @@ interface ParsedDataValidatorProps {
 export const validateProcessGraphLive = (graph: ProcessGraph): ValidationIssue[] => {
   const issues: ValidationIssue[] = [];
 
+  // Safety checks for required fields
+  if (!graph) {
+    return issues;
+  }
+
+  // Ensure all required arrays exist
+  const safeGraph = {
+    ...graph,
+    routes: graph.routes || [],
+    stations: graph.stations || [],
+    entities: graph.entities || [],
+    arrivals: graph.arrivals || [],
+    resources: graph.resources || [],
+    runConfig: graph.runConfig || { runLength_min: 480, warmup_min: 0, replications: 1, confidence: 95 as const }
+  };
+
+  // Use safeGraph for all validations below
   // Validate route probabilities sum to 1.0 for each station
-  const routesByStation = new Map<string, typeof graph.routes>();
-  graph.routes.forEach((route) => {
+  const routesByStation = new Map<string, typeof safeGraph.routes>();
+  safeGraph.routes.forEach((route) => {
     if (!routesByStation.has(route.from)) {
       routesByStation.set(route.from, []);
     }
@@ -38,7 +55,7 @@ export const validateProcessGraphLive = (graph: ProcessGraph): ValidationIssue[]
         suggestion: `Normalize probabilities to sum to 1.0`,
         autoFix: () => {
           const newGraph = JSON.parse(JSON.stringify(graph));
-          newGraph.routes.forEach((route: typeof graph.routes[0]) => {
+          newGraph.routes.forEach((route: typeof safeGraph.routes[0]) => {
             if (route.from === stationId) {
               route.probability = route.probability / sum;
             }
@@ -50,8 +67,8 @@ export const validateProcessGraphLive = (graph: ProcessGraph): ValidationIssue[]
   });
 
   // Validate station references in routes
-  const stationIds = new Set(graph.stations.map((s) => s.id));
-  graph.routes.forEach((route, idx) => {
+  const stationIds = new Set(safeGraph.stations.map((s) => s.id));
+  safeGraph.routes.forEach((route, idx) => {
     if (!stationIds.has(route.from)) {
       issues.push({
         severity: 'error',
@@ -73,7 +90,7 @@ export const validateProcessGraphLive = (graph: ProcessGraph): ValidationIssue[]
   });
 
   // Validate triangular distribution constraints: min <= mode <= max
-  graph.stations.forEach((station, idx) => {
+  safeGraph.stations.forEach((station, idx) => {
     if (station.processTime?.type === 'triangular') {
       const { min, mode, max } = station.processTime.params as {
         min: number;
@@ -103,7 +120,7 @@ export const validateProcessGraphLive = (graph: ProcessGraph): ValidationIssue[]
   });
 
   // Validate normal distribution (stdev must be positive)
-  graph.stations.forEach((station, idx) => {
+  safeGraph.stations.forEach((station, idx) => {
     if (station.processTime?.type === 'normal') {
       const { stdev } = station.processTime.params as { mean: number; stdev: number };
       if (stdev <= 0) {
@@ -119,7 +136,7 @@ export const validateProcessGraphLive = (graph: ProcessGraph): ValidationIssue[]
   });
 
   // Validate exponential distribution (mean must be positive)
-  graph.stations.forEach((station, idx) => {
+  safeGraph.stations.forEach((station, idx) => {
     if (station.processTime?.type === 'exponential') {
       const { mean } = station.processTime.params as { mean: number };
       if (mean <= 0) {
@@ -135,7 +152,7 @@ export const validateProcessGraphLive = (graph: ProcessGraph): ValidationIssue[]
   });
 
   // Validate uniform distribution (min < max)
-  graph.stations.forEach((station, idx) => {
+  safeGraph.stations.forEach((station, idx) => {
     if (station.processTime?.type === 'uniform') {
       const { min, max } = station.processTime.params as { min: number; max: number };
       if (min >= max) {
@@ -156,11 +173,11 @@ export const validateProcessGraphLive = (graph: ProcessGraph): ValidationIssue[]
   });
 
   // Check for disconnected stations (no incoming or outgoing routes)
-  graph.stations.forEach((station) => {
+  safeGraph.stations.forEach((station) => {
     if (station.kind === 'source' || station.kind === 'sink') return; // Sources/sinks can be disconnected
 
-    const hasIncoming = graph.routes.some((r) => r.to === station.id);
-    const hasOutgoing = graph.routes.some((r) => r.from === station.id);
+    const hasIncoming = safeGraph.routes.some((r) => r.to === station.id);
+    const hasOutgoing = safeGraph.routes.some((r) => r.from === station.id);
 
     if (!hasIncoming && !hasOutgoing) {
       issues.push({
@@ -190,10 +207,10 @@ export const validateProcessGraphLive = (graph: ProcessGraph): ValidationIssue[]
   });
 
   // Check for rework loops without escape
-  graph.stations.forEach((station) => {
+  safeGraph.stations.forEach((station) => {
     if (station.rework) {
       const reworkTarget = station.rework.to;
-      const hasEscape = graph.routes.some(
+      const hasEscape = safeGraph.routes.some(
         (r) => r.from === reworkTarget && r.to !== station.id && r.probability > 0
       );
       if (!hasEscape) {
@@ -209,28 +226,28 @@ export const validateProcessGraphLive = (graph: ProcessGraph): ValidationIssue[]
   });
 
   // Performance warnings
-  if (graph.runConfig.replications > 1000) {
+  if (safeGraph.runConfig && safeGraph.runConfig.replications > 1000) {
     issues.push({
       severity: 'warning',
       category: 'performance',
       path: 'runConfig.replications',
-      message: `${graph.runConfig.replications} replications may take a long time to execute`,
+      message: `${safeGraph.runConfig.replications} replications may take a long time to execute`,
       suggestion: `Consider starting with 100-500 replications for faster results`
     });
   }
 
-  if (graph.runConfig.runLength_min > 10000) {
+  if (safeGraph.runConfig && safeGraph.runConfig.runLength_min > 10000) {
     issues.push({
       severity: 'info',
       category: 'performance',
       path: 'runConfig.runLength_min',
-      message: `Run length of ${graph.runConfig.runLength_min} minutes is very long`,
+      message: `Run length of ${safeGraph.runConfig.runLength_min} minutes is very long`,
       suggestion: `Consider shorter run length for initial validation`
     });
   }
 
   // Check for arrival policy
-  if (graph.arrivals.length === 0) {
+  if (safeGraph.arrivals.length === 0) {
     issues.push({
       severity: 'error',
       category: 'logic',
@@ -241,8 +258,8 @@ export const validateProcessGraphLive = (graph: ProcessGraph): ValidationIssue[]
   }
 
   // Check entity references
-  const entityIds = new Set(graph.entities.map((e) => e.id));
-  graph.arrivals.forEach((arrival, idx) => {
+  const entityIds = new Set(safeGraph.entities.map((e) => e.id));
+  safeGraph.arrivals.forEach((arrival, idx) => {
     if (arrival.policy === 'poisson' && arrival.class_mix) {
       arrival.class_mix.forEach((mix, mixIdx) => {
         if (!entityIds.has(mix.class)) {
