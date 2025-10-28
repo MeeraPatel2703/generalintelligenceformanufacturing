@@ -563,6 +563,190 @@ ipcMain.handle('chatbot:sendMessage', async (_event, request) => {
   }
 })
 
+// ============================================================================
+// NLP EDITOR HANDLER - Natural Language Model Editing
+// ============================================================================
+
+ipcMain.handle('des-parser:process-nlp-edit', async (_event, request: {
+  currentGraph: any;
+  nlpCommand: string;
+}) => {
+  try {
+    safeLog('[Main] Processing NLP edit command:', request.nlpCommand)
+    
+    // Validate inputs
+    if (!request.currentGraph) {
+      throw new Error('currentGraph is required')
+    }
+    if (!request.nlpCommand || !request.nlpCommand.trim()) {
+      throw new Error('nlpCommand is required')
+    }
+
+    // Check if OpenAI is available
+    if (!process.env.OPENAI_API_KEY) {
+      return {
+        success: false,
+        error: 'OpenAI API key not configured',
+        message: 'Please configure your OpenAI API key in settings'
+      }
+    }
+
+    // Build the system prompt for the AI
+    const systemPrompt = `You are a DES (Discrete Event Simulation) model editor AI assistant.
+You receive a ProcessGraph JSON object and a natural language command from the user.
+
+Your job is to:
+1. Parse the command to understand what changes to make
+2. Modify the ProcessGraph accordingly
+3. Return the updated graph with a detailed list of changes
+
+CRITICAL RULES:
+- Make ONLY the requested changes - do not modify anything else
+- Maintain data integrity (valid IDs, probabilities sum to 1.0, positive numbers)
+- If adding a station, generate a unique ID (e.g., "STN_NewMachine")
+- If changing a distribution, validate parameters (min < mode < max for triangular, stdev > 0 for normal)
+- Return success=false if the command is unclear, ambiguous, or invalid
+- ALWAYS preserve all existing data structures and fields
+
+ProcessGraph Schema Overview:
+- entities: Entity[] - Entity types (id, batchSize, class, attributes, priority)
+- arrivals: Arrival[] - Arrival patterns (policy: poisson/schedule_table/empirical)
+- stations: Station[] - Machines/buffers (id, kind, count, capacity, queue, processTime distribution)
+- routes: Route[] - Flow routing (from, to, probability - must sum to 1.0 per station)
+- resources: ResourcePool[] - Operators, tools, vehicles (id, type, count)
+- calendars: Calendar[] - Shift schedules (id, shifts, breaks)
+- runConfig: { runLength_min, warmup_min, replications, confidence }
+- metadata: { model_id, version, description, assumptions, missing }
+
+Common Distribution Types:
+- constant: { type: 'constant', params: { value: X }, units: 'minutes' }
+- triangular: { type: 'triangular', params: { min: X, mode: Y, max: Z }, units: 'minutes' }
+- normal: { type: 'normal', params: { mean: X, stdev: Y }, units: 'minutes' }
+- exponential: { type: 'exponential', params: { mean: X }, units: 'minutes' }
+- uniform: { type: 'uniform', params: { min: X, max: Y }, units: 'minutes' }
+
+Example Commands:
+- "Add a new machine called Inspection with 5 minute cycle time"
+- "Change CNC cycle time to triangular(10, 12, 15) minutes"
+- "Set Assembly to 3 parallel servers"
+- "Add route from CNC to QC with 80% probability"
+- "Change run length to 10000 minutes"
+- "Set warmup period to 1000 minutes"
+
+RESPONSE FORMAT (must be valid JSON):
+{
+  "success": true,
+  "updatedGraph": <complete ProcessGraph object with modifications>,
+  "message": "Brief summary of what was changed",
+  "changes": [
+    "Detailed change #1",
+    "Detailed change #2"
+  ]
+}
+
+If there's an error or unclear command:
+{
+  "success": false,
+  "error": "Specific reason why it failed",
+  "message": "User-friendly error message",
+  "suggestions": ["Suggestion 1", "Suggestion 2"]
+}`;
+
+    // Build the user message with current graph and command
+    const userMessage = `Current ProcessGraph:
+${JSON.stringify(request.currentGraph, null, 2)}
+
+Natural Language Command from User:
+"${request.nlpCommand}"
+
+Please analyze the command and modify the ProcessGraph accordingly. Return the complete updated graph with all changes applied.`
+
+    // Import OpenAI dynamically
+    const { default: OpenAI } = await import('openai')
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    })
+
+    safeLog('[Main] Calling OpenAI API for NLP processing...')
+
+    // Call OpenAI with JSON mode
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4.1',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMessage }
+      ],
+      temperature: 0.0, // Zero temperature for deterministic results
+      response_format: { type: 'json_object' },
+    })
+
+    const aiResponse = completion.choices[0].message.content
+    if (!aiResponse) {
+      throw new Error('AI returned empty response')
+    }
+
+    safeLog('[Main] AI response received, parsing...')
+
+    // Parse AI response
+    let result
+    try {
+      result = JSON.parse(aiResponse)
+    } catch (parseError) {
+      safeError('[Main] Failed to parse AI response:', parseError)
+      return {
+        success: false,
+        error: 'AI returned invalid JSON response',
+        message: 'The AI response could not be parsed. Please try rephrasing your command.'
+      }
+    }
+
+    // Validate the result structure
+    if (!result.success && !result.error) {
+      return {
+        success: false,
+        error: 'Invalid AI response structure',
+        message: 'The AI response was malformed. Please try again.'
+      }
+    }
+
+    if (!result.success) {
+      safeWarn('[Main] NLP edit failed:', result.error)
+      return {
+        success: false,
+        error: result.error || 'AI failed to update graph',
+        message: result.message || 'Command could not be processed',
+        suggestions: result.suggestions || []
+      }
+    }
+
+    // Validate the updated graph exists
+    if (!result.updatedGraph) {
+      return {
+        success: false,
+        error: 'AI did not return updated graph',
+        message: 'The AI failed to generate an updated model. Please try again.'
+      }
+    }
+
+    // Return successful result
+    safeLog('[Main] NLP edit successful:', result.message)
+    return {
+      success: true,
+      updatedGraph: result.updatedGraph,
+      message: result.message || 'Changes applied successfully',
+      changes: result.changes || []
+    }
+
+  } catch (error) {
+    safeError('[Main] NLP edit error:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      message: 'Failed to process natural language command. Please try again.'
+    }
+  }
+})
+
 // Clean up cache on app quit
 app.on('will-quit', () => {
   safeLog('[Main] Cleaning up before quit')

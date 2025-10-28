@@ -1879,7 +1879,7 @@ const ParsedDataReview: React.FC<ParsedDataReviewProps> = ({
       {/* NLP Chatbot Section */}
       <div className="nlp-chatbot-section">
         <div className="chatbot-header">
-          <h3>💬 Natural Language Editor</h3>
+          <h3>Natural Language Editor</h3>
           <p className="chatbot-subtitle">Describe changes in plain English and I'll update the model</p>
         </div>
 
@@ -1897,7 +1897,14 @@ const ParsedDataReview: React.FC<ParsedDataReviewProps> = ({
               onClick={handleNlpSubmit}
               disabled={!nlpInput.trim() || nlpProcessing}
             >
-              {nlpProcessing ? 'Processing...' : 'Apply Changes'}
+              {nlpProcessing ? (
+                <>
+                  <span className="spinner"></span>
+                  Processing...
+                </>
+              ) : (
+                'Apply Changes'
+              )}
             </button>
           </div>
 
@@ -2261,22 +2268,33 @@ const ParsedDataReview: React.FC<ParsedDataReviewProps> = ({
 
 
         .nlp-chatbot-section {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          padding: 2rem;
+          background: #000000;
           border-radius: 8px;
-          margin-bottom: 2rem;
+          padding: 2rem;
+          margin-top: 3rem;
+          margin-bottom: 3rem;
+          border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .chatbot-header h3 {
           margin: 0 0 0.5rem 0;
           font-size: 1.5rem;
           color: white;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-family: var(--font-mono, 'SF Mono', 'Monaco', 'Consolas', monospace);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          font-weight: 600;
         }
 
         .chatbot-subtitle {
           margin: 0;
-          opacity: 0.9;
-          color: white;
+          opacity: 0.7;
+          color: rgba(255, 255, 255, 0.8);
+          font-size: 0.875rem;
+          font-family: var(--font-mono, 'SF Mono', 'Monaco', 'Consolas', monospace);
         }
 
         .chatbot-container {
@@ -2292,57 +2310,84 @@ const ParsedDataReview: React.FC<ParsedDataReviewProps> = ({
         .chatbot-input {
           flex: 1;
           padding: 1rem;
-          border: none;
-          border-radius: 6px;
-          background: rgba(255, 255, 255, 0.95);
-          color: #1a202c;
-          font-family: inherit;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 4px;
+          background: rgba(0, 0, 0, 0.3);
+          color: white;
           font-size: 1rem;
           line-height: 1.5;
           resize: vertical;
+          transition: border-color 0.2s;
+        }
+
+        .chatbot-input:focus {
+          outline: none;
+          border-color: #4299e1;
         }
 
         .chatbot-input::placeholder {
-          color: rgba(0, 0, 0, 0.4);
+          color: rgba(255, 255, 255, 0.4);
           line-height: 1.5;
         }
 
         .chatbot-submit {
-          background: white;
-          color: #667eea;
-          border: none;
+          background: #000000;
+          color: white;
+          border: 1px solid rgba(255, 255, 255, 0.3);
           padding: 1rem 2rem;
-          font-size: 1.1rem;
+          font-size: 1rem;
           font-weight: 600;
-          border-radius: 6px;
+          border-radius: 4px;
           cursor: pointer;
-          transition: transform 0.2s ease;
+          transition: all 0.2s;
           white-space: nowrap;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
         }
 
         .chatbot-submit:hover:not(:disabled) {
-          transform: translateY(-2px);
+          background: #1a1a1a;
+          border-color: rgba(255, 255, 255, 0.5);
         }
 
         .chatbot-submit:disabled {
-          opacity: 0.5;
+          opacity: 0.6;
           cursor: not-allowed;
+          background: #000000;
+        }
+
+        .spinner {
+          width: 16px;
+          height: 16px;
+          border: 2px solid rgba(255, 255, 255, 0.3);
+          border-top-color: white;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
         }
 
         .chatbot-response {
           margin-top: 1.5rem;
           padding: 1.5rem;
           border-radius: 6px;
-          background: white;
-          color: #1a202c;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .chatbot-response.success {
           border-left: 4px solid #48bb78;
+          background: rgba(72, 187, 120, 0.1);
         }
 
         .chatbot-response.error {
           border-left: 4px solid #f56565;
+          background: rgba(245, 101, 101, 0.1);
         }
 
         .response-header {
@@ -2350,6 +2395,8 @@ const ParsedDataReview: React.FC<ParsedDataReviewProps> = ({
           align-items: center;
           gap: 0.5rem;
           margin-bottom: 0.75rem;
+          color: white;
+          font-weight: 600;
         }
 
         .response-icon {
@@ -2359,26 +2406,32 @@ const ParsedDataReview: React.FC<ParsedDataReviewProps> = ({
         .response-message {
           margin-bottom: 1rem;
           line-height: 1.5;
+          color: rgba(255, 255, 255, 0.9);
         }
 
         .response-changes {
-          background: rgba(0, 0, 0, 0.05);
+          background: rgba(0, 0, 0, 0.2);
           padding: 1rem;
           border-radius: 4px;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .response-changes h4 {
-          margin: 0 0 0.5rem 0;
-          font-size: 1rem;
+          margin: 0 0 0.75rem 0;
+          font-size: 0.95rem;
+          color: white;
+          opacity: 0.9;
         }
 
         .response-changes ul {
           margin: 0;
           padding-left: 1.5rem;
+          color: rgba(255, 255, 255, 0.8);
         }
 
         .response-changes li {
-          margin: 0.25rem 0;
+          margin: 0.5rem 0;
+          line-height: 1.4;
         }
       `}</style>
     </div>
