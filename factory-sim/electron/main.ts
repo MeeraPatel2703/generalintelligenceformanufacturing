@@ -482,10 +482,10 @@ ipcMain.handle('document:info', async (_event, filePath: string) => {
 })
 
 // Comprehensive simulation handler (formerly KeyCraft)
-ipcMain.handle('run-comprehensive-simulation', async (_event, extractedSystemOrAnalysis, numReplications: number = 10) => {
+ipcMain.handle('run-comprehensive-simulation', async (_event, extractedSystemOrAnalysis, numReplications: number = 100) => {
   try {
     safeLog('[Main] Starting comprehensive simulation with advanced analysis')
-    safeLog('[Main] Replications:', numReplications)
+    safeLog('[Main] Received numReplications parameter:', numReplications, 'type:', typeof numReplications)
 
     // Check if this is an ExtractedSystem (from document) or FactoryAnalysis
     if (extractedSystemOrAnalysis?.systemName && extractedSystemOrAnalysis?.entities) {

@@ -439,11 +439,60 @@ export class IndustrialSimulationAdapter {
    * Parse process sequences into routing rules
    * Converts seize → delay → release patterns into stages with routing logic
    */
+  /**
+   * Create default sequential flow when no processes are defined
+   * Each resource becomes a stage, routing to the next resource in sequence
+   */
+  private createDefaultSequentialFlow(): void {
+    console.log('[IndustrialAdapter] Creating default sequential flow...');
+
+    // For each entity type, create a sequential flow through all resources
+    this.system.entities.forEach(entityDef => {
+      const stages: ProcessStage[] = [];
+
+      // Create a stage for each resource
+      this.system.resources.forEach((resource, index) => {
+        const stageId = `stage_${index}_${resource.name}`;
+        const isLastResource = index === this.system.resources.length - 1;
+
+        const stage: ProcessStage = {
+          stageId: stageId,
+          stepType: 'seize',
+          resourceName: resource.name,
+          processingTime: resource.processingTime ? this.convertDistribution(resource.processingTime) : { type: 'constant', value: 1 },
+          nextStageRules: []
+        };
+
+        // Route to next resource or EXIT
+        if (isLastResource) {
+          stage.nextStageRules.push({ nextStageId: 'EXIT' });
+          console.log(`[IndustrialAdapter]   Stage ${index}: ${resource.name} → EXIT`);
+        } else {
+          const nextStageId = `stage_${index + 1}_${this.system.resources[index + 1].name}`;
+          stage.nextStageRules.push({ nextStageId });
+          console.log(`[IndustrialAdapter]   Stage ${index}: ${resource.name} → ${this.system.resources[index + 1].name}`);
+        }
+
+        stages.push(stage);
+      });
+
+      // Register the flow for this entity type
+      const flow: ProcessFlow = {
+        entityType: entityDef.name,
+        stages
+      };
+
+      this.processFlows.set(entityDef.name, flow);
+      console.log(`[IndustrialAdapter] ✓ Created default sequential flow for ${entityDef.name} with ${stages.length} stages`);
+    });
+  }
+
   private parseProcessSequences(): void {
     console.log('[IndustrialAdapter] Parsing process sequences...');
 
     if (!this.system.processes || this.system.processes.length === 0) {
-      console.warn('[IndustrialAdapter] No processes defined - using simple single-resource routing');
+      console.warn('[IndustrialAdapter] No processes defined - creating default sequential flow through all resources');
+      this.createDefaultSequentialFlow();
       return;
     }
 

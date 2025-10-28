@@ -22,6 +22,23 @@ export function runExtractedSystemWithComprehensiveAnalysis(
 ): FactoryAnalysis {
   console.log('[Adapter] Converting ExtractedSystem to FactoryAnalysis format...');
 
+  // Validate system structure
+  if (!system) {
+    throw new Error('ExtractedSystem is null or undefined');
+  }
+  if (!system.resources || system.resources.length === 0) {
+    throw new Error('ExtractedSystem has no resources defined');
+  }
+  if (!system.entities || system.entities.length === 0) {
+    throw new Error('ExtractedSystem has no entities defined');
+  }
+
+  console.log('[Adapter] System validation passed:', {
+    resources: system.resources.length,
+    entities: system.entities.length,
+    processes: system.processes?.length || 0
+  });
+
   // Run the DES simulation
   const model = new GenericDESModel(system);
 
@@ -111,6 +128,12 @@ function convertToFactoryAnalysis(
 
   // Create machine entries from resources
   const machines = (system.resources || []).map((resource) => {
+    // Validate resource has a name
+    if (!resource || !resource.name) {
+      console.error('[Adapter] Resource missing name:', resource);
+      throw new Error('Resource missing required "name" property');
+    }
+
     const resourceName = resource.name;
     const utilization = aggregated.resources?.[resourceName]?.utilization || 0.5;
     const utilizationStdDev = aggregated.resources?.[resourceName]?.utilizationStdDev || 0.1;
@@ -119,10 +142,18 @@ function convertToFactoryAnalysis(
     const processTime = resource.processingTime?.parameters?.mean ||
                        resource.processingTime?.parameters?.value || 5;
 
+    // Map resource type to machine type
+    let machineType = 'CNC'; // default
+    if (resource.type) {
+      machineType = mapResourceTypeToMachineType(resource.type);
+    } else {
+      machineType = inferMachineType(resourceName);
+    }
+
     return {
       id: resourceName.replace(/\s+/g, '_'),
       name: resourceName,
-      type: inferMachineType(resource.name) as any,
+      type: machineType as any,
       plc_tag_prefix: resourceName.replace(/\s+/g, '_').toUpperCase(),
       cycle_time: {
         distribution_type: 'normal' as const,
@@ -274,6 +305,28 @@ function calculateStdDev(values: number[]): number {
   const squaredDiffs = values.map(v => Math.pow(v - mean, 2));
   const variance = squaredDiffs.reduce((a, b) => a + b, 0) / values.length;
   return Math.sqrt(variance);
+}
+
+/**
+ * Infer machine type from resource name
+ */
+/**
+ * Map ExtractedSystem ResourceType to FactoryAnalysis MachineType
+ */
+function mapResourceTypeToMachineType(resourceType: string): string {
+  const typeMap: Record<string, string> = {
+    'server': 'CNC',
+    'machine': 'CNC',
+    'worker': 'Assembly',
+    'conveyor': 'Storage',
+    'path': 'Storage',
+    'storage': 'Storage',
+    'vehicle': 'Storage',
+    'room': 'QualityControl',
+    'custom': 'CNC'
+  };
+
+  return typeMap[resourceType.toLowerCase()] || 'CNC';
 }
 
 /**

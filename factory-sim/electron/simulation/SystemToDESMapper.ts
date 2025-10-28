@@ -38,6 +38,19 @@ export class GenericDESModel extends DESEngine {
 
       const pattern = entityType.arrivalPattern
 
+      // Validate pattern exists
+      if (!pattern) {
+        console.warn(`[GenericDESModel] No arrival pattern defined for ${entityType.name}, using default Poisson`);
+        this.schedulePoissonArrivals(entityType, simulationTime, 1, 'per_hour');
+        continue;
+      }
+
+      if (!pattern.type) {
+        console.warn(`[GenericDESModel] Arrival pattern missing type for ${entityType.name}, defaulting to Poisson`);
+        this.schedulePoissonArrivals(entityType, simulationTime, pattern.rate || 1, pattern.rateUnit || 'per_hour');
+        continue;
+      }
+
       switch (pattern.type) {
         case 'poisson':
         case 'scheduled':

@@ -38,6 +38,9 @@ export class SimulationEngine {
   private partIdCounter: number = 0;
   private completedParts: Part[] = [];
 
+  // Blocked parts tracking for retry mechanism
+  private blockedParts: Map<string, { part: Part; fromMachine: Machine; toMachine: Machine }> = new Map();
+
   // Event handlers (bound to this instance)
   private eventHandlers: Map<EventType, (event: SimulationEvent) => void>;
 
@@ -65,6 +68,7 @@ export class SimulationEngine {
       ['ARRIVAL', this.handleArrival.bind(this)],
       ['START_PROCESSING', this.handleStartProcessing.bind(this)],
       ['END_PROCESSING', this.handleEndProcessing.bind(this)],
+      ['RETRY_BLOCKED_TRANSFER', this.handleRetryBlockedTransfer.bind(this)],
       ['END_SIMULATION', this.handleEndSimulation.bind(this)]
     ]);
   }
@@ -149,7 +153,11 @@ export class SimulationEngine {
       }
     }
 
-    console.log(`[DES Engine] Replication ${repNumber + 1} complete: ${eventCount} events processed`);
+    console.log(`[DES Engine] Replication ${repNumber + 1} complete:`);
+    console.log(`  - Events processed: ${eventCount}`);
+    console.log(`  - Parts completed: ${this.completedParts.length}`);
+    console.log(`  - Parts in system: ${this.parts.size - this.completedParts.length}`);
+    console.log(`  - Blocked parts: ${this.blockedParts.size}`);
 
     // Collect statistics
     return this.collectStatistics();
@@ -262,8 +270,8 @@ export class SimulationEngine {
       } else {
         // Next machine queue is full - current machine becomes blocked
         machine.setBlocked(this.currentTime);
-        // Part stays with current machine until next machine has space
-        // (In a real implementation, we'd need a mechanism to retry)
+        // Store blocked part info for retry mechanism
+        this.scheduleBlockedPartRetry(machine, part, nextMachine);
       }
     } else {
       // Part exits system
@@ -276,6 +284,11 @@ export class SimulationEngine {
         this.stats.recordSample('cycleTime', part.getCycleTime());
         this.stats.recordSample('valueAddTime', part.getValueAddedTime());
         this.stats.recordSample('waitTime', part.getTotalWaitTime());
+
+        // Log part completion every 10 parts
+        if (this.completedParts.length % 10 === 0) {
+          console.log(`[DES Engine] ✓ ${this.completedParts.length} parts completed, cycle time: ${part.getCycleTime().toFixed(2)} min`);
+        }
       }
     }
 
@@ -323,6 +336,53 @@ export class SimulationEngine {
       machineId: machine.id,
       partId: part.id
     });
+  }
+
+  /**
+   * Schedule retry for blocked part transfer
+   */
+  private scheduleBlockedPartRetry(fromMachine: Machine, part: Part, toMachine: Machine): void {
+    // Store blocked part info
+    this.blockedParts.set(part.id, { part, fromMachine, toMachine });
+
+    // Schedule a retry event after a small delay (0.1 minutes)
+    this.eventQueue.enqueue({
+      time: this.currentTime + 0.1,
+      type: 'RETRY_BLOCKED_TRANSFER',
+      machineId: fromMachine.id,
+      partId: part.id
+    });
+  }
+
+  /**
+   * Handle retry for blocked part transfer
+   */
+  private handleRetryBlockedTransfer(event: SimulationEvent): void {
+    if (!event.partId) return;
+
+    const blockedInfo = this.blockedParts.get(event.partId);
+    if (!blockedInfo) {
+      // Part already transferred or cleared
+      return;
+    }
+
+    const { part, fromMachine, toMachine } = blockedInfo;
+
+    // Try to transfer again
+    if (toMachine.canAccept()) {
+      // Success! Transfer immediately
+      fromMachine.setIdle(this.currentTime);
+      this.blockedParts.delete(part.id);
+      this.scheduleStartProcessing(toMachine, part);
+    } else if (toMachine.canEnqueue()) {
+      // Queue is available now
+      fromMachine.setIdle(this.currentTime);
+      this.blockedParts.delete(part.id);
+      toMachine.enqueue(part, this.currentTime);
+    } else {
+      // Still blocked, schedule another retry
+      this.scheduleBlockedPartRetry(fromMachine, part, toMachine);
+    }
   }
 
   /**
@@ -466,6 +526,7 @@ export class SimulationEngine {
     this.eventQueue.clear();
     this.parts.clear();
     this.completedParts = [];
+    this.blockedParts.clear();
     this.stats.reset();
 
     // Reset all machines

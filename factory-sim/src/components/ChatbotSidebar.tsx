@@ -41,11 +41,28 @@ export function ChatbotSidebar({ system, currentResults, onRunScenario, onClose 
         role: 'assistant',
         content: `Hello! I'm your simulation assistant. I can help you:
 
-Query data - "What was the average throughput?"
-Run scenarios - "Run a scenario with Machine1 capacity of 3"
-Compare results - "Compare the last two scenarios"
-Analyze bottlenecks - "What's the primary bottleneck?"
-Optimize parameters - "Optimize for maximum throughput"
+**Query data:**
+- "What was the average throughput?"
+- "Show me cycle times"
+- "What's the utilization of each machine?"
+
+**Run scenarios:**
+- "Run a scenario with Machine1 capacity of 3"
+- "Test doubling the arrival rate"
+- "Simulate with 5 replications"
+
+**Compare results:**
+- "Compare the last two scenarios"
+- "Which scenario had better throughput?"
+
+**Analyze bottlenecks:**
+- "What's the primary bottleneck?"
+- "Which machine is most utilized?"
+- "Analyze queue lengths"
+
+**Optimize:**
+- "Optimize for maximum throughput"
+- "What changes would improve performance?"
 
 What would you like to know?`,
         timestamp: Date.now(),
@@ -304,13 +321,17 @@ What would you like to know?`,
     <div
       className="chatbot-sidebar"
       style={{
-        width: '400px',
+        position: 'fixed',
+        right: 0,
+        top: 0,
+        width: '420px',
         height: '100vh',
         backgroundColor: 'var(--color-bg-secondary)',
         borderLeft: '2px solid var(--color-border)',
         display: 'flex',
         flexDirection: 'column',
         boxShadow: '-4px 0 12px rgba(0, 0, 0, 0.3)',
+        zIndex: 1000,
       }}
     >
         {/* Header */}

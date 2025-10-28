@@ -2,7 +2,7 @@
 
 export type MachineType = 'CNC' | 'Assembly' | 'QualityControl' | 'Storage';
 export type MachineState = 'idle' | 'busy' | 'blocked' | 'down';
-export type EventType = 'ARRIVAL' | 'START_PROCESSING' | 'END_PROCESSING' | 'BREAKDOWN' | 'REPAIR' | 'END_SIMULATION';
+export type EventType = 'ARRIVAL' | 'START_PROCESSING' | 'END_PROCESSING' | 'BREAKDOWN' | 'REPAIR' | 'END_SIMULATION' | 'RETRY_BLOCKED_TRANSFER';
 export type DistributionType = 'normal' | 'exponential' | 'triangular' | 'constant';
 
 export interface ProcessTimeConfig {
