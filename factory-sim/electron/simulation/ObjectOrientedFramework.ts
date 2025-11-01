@@ -3,8 +3,8 @@
  * Provides reusable simulation objects, hierarchical models, and templates
  */
 
-import { DESEngine, Entity, EventType } from './DESEngine.js'
-import type { Position3D } from './Simulation3DEngine.js'
+import { DESEngine, Entity, EventType } from './DESEngine'
+import type { Position3D } from './Simulation3DEngine'
 
 // ============================================================================
 // BASE SIMULATION OBJECT

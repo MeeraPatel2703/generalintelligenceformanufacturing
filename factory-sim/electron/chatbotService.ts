@@ -4,7 +4,7 @@
  */
 
 import OpenAI from 'openai';
-import { safeLog, safeError } from './safeConsole.js';
+import { safeLog, safeError } from './safeConsole';
 import {
   ChatMessage,
   QuerySimulationDataArgs,

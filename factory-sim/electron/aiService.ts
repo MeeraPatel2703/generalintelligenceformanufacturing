@@ -1,5 +1,5 @@
 import { FactoryAnalysis } from '../src/types/analysis';
-import { safeLog, safeError, safeWarn } from './safeConsole.js';
+import { safeLog, safeError, safeWarn } from './safeConsole';
 
 // OpenAI API configuration - Optimized for quality
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';

@@ -4,7 +4,7 @@
  * Complete implementation of The Summit at Snoqualmie snow tubing facility
  */
 
-import { DESEngine, EventType, SimEvent, Entity } from './DESEngine.js'
+import { DESEngine, EventType, SimEvent, Entity } from './DESEngine'
 
 // ============================================================================
 // CONFIGURATION

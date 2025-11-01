@@ -1,22 +1,19 @@
 import { app, BrowserWindow, ipcMain, dialog, session } from 'electron'
 import * as path from 'path'
 import * as fs from 'fs/promises'
-import { fileURLToPath } from 'url'
 import dotenv from 'dotenv'
-import { analyzeFactoryData } from './aiService.js'
-// import { cacheService } from './cache.js' // DISABLED - better-sqlite3 causing issues
-import { runSimpleMonteCarlo } from './simulation/simpleSim.js'
-import { runDESSimulation, runComprehensiveSimulation } from './simulation/desRunner.js'
-import { parseDocument, validateDocumentFile, getDocumentInfo } from './documentParser.js'
-import { extractSystemFromDocument } from './entityExtractor.js'
-import { runDESFromExtractedSystem } from './simulation/SystemToDESMapper.js'
-import { runExtractedSystemWithComprehensiveAnalysis } from './simulation/ExtractedSystemToAnalysisAdapter.js'
-import { initializeChatbot, handleChatbotMessage } from './chatbotService.js'
-import { safeLog, safeError, safeWarn } from './safeConsole.js'
+import { analyzeFactoryData } from './aiService'
+// import { cacheService } from './cache' // DISABLED - better-sqlite3 causing issues
+import { runSimpleMonteCarlo } from './simulation/simpleSim'
+import { runDESSimulation, runComprehensiveSimulation } from './simulation/desRunner'
+import { parseDocument, validateDocumentFile, getDocumentInfo } from './documentParser'
+import { extractSystemFromDocument } from './entityExtractor'
+import { runDESFromExtractedSystem } from './simulation/SystemToDESMapper'
+import { runExtractedSystemWithComprehensiveAnalysis } from './simulation/ExtractedSystemToAnalysisAdapter'
+import { initializeChatbot, handleChatbotMessage } from './chatbotService'
+import { safeLog, safeError, safeWarn } from './safeConsole'
 
-// ES module equivalent of __dirname
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+// __dirname is available in CommonJS automatically
 
 // Load environment variables from .env file
 // Try multiple locations for .env file (development vs packaged)

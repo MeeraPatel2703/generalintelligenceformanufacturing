@@ -5,10 +5,10 @@
  * Now enhanced with comprehensive Simio-style statistics and analysis.
  */
 
-import { SimulationEngine } from './engine.js';
-import { ComprehensiveAnalyzer } from './ComprehensiveAnalyzer.js';
-import { FactoryAnalysis } from '../../src/types/analysis.js';
-import { SimulationConfig, SimulationResults, ComprehensiveSimulationResults } from '../../src/types/simulation.js';
+import { SimulationEngine } from './engine';
+import { ComprehensiveAnalyzer } from './ComprehensiveAnalyzer';
+import { FactoryAnalysis } from '../../src/types/analysis';
+import { SimulationConfig, SimulationResults, ComprehensiveSimulationResults } from '../../src/types/simulation';
 
 /**
  * Convert AI analysis to DES simulation config

@@ -1,5 +1,5 @@
 import { ExtractedSystem, ExtractionResult } from '../src/types/extraction';
-import { safeLog, safeError, safeWarn } from './safeConsole.js';
+import { safeLog, safeError, safeWarn } from './safeConsole';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 const MODEL = 'gpt-4o'; // GPT-4o for complex extraction

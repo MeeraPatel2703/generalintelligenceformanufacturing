@@ -15,7 +15,7 @@
 .config-header {
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 1001; /* Above ModeSwitcher (z-index: 1000) */
   background: var(--color-bg-secondary, #111);
   border-bottom: 1px solid var(--color-border, #2a2a2a);
   padding: 1.5rem 2rem;
@@ -23,6 +23,7 @@
   justify-content: space-between;
   align-items: center;
   gap: 2rem;
+  flex-wrap: wrap;
 }
 
 .config-header__title h1 {

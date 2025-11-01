@@ -1,6 +1,6 @@
 import { FactoryAnalysis } from '../../src/types/analysis';
 import { SimulationResults, StatisticResult } from '../../src/types/simulation';
-import { safeLog } from '../safeConsole.js';
+import { safeLog } from '../safeConsole';
 
 /**
  * Quick Monte Carlo simulation for factory bottleneck analysis

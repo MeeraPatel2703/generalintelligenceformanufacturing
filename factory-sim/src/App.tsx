@@ -11,6 +11,7 @@ import { IntegratedSimulation } from './pages/IntegratedSimulation'
 import { useDESModelStore } from './store/desModelStore'
 import { FloatingChatbotButton } from './components/FloatingChatbotButton'
 import { ChatbotSidebar } from './components/ChatbotSidebar'
+import { ApexPrecisionDemo } from './components/ApexPrecisionDemo'
 import './index.css'
 
 interface CSVData {
@@ -26,7 +27,13 @@ interface CSVData {
 function App() {
   const [mode, setMode] = useState<'analysis' | 'builder' | 'extraction' | 'simulation'>('extraction')
   const [isChatbotOpen, setIsChatbotOpen] = useState(false)
-  const { extractedSystem, comprehensiveResults } = useDESModelStore()
+  const [showApexDemo, setShowApexDemo] = useState(false)
+  const { extractedSystem, comprehensiveResults} = useDESModelStore()
+
+  // Debug log for Apex demo state
+  useEffect(() => {
+    console.log('[APEX] showApexDemo state changed:', showApexDemo);
+  }, [showApexDemo]);
 
   // Check URL hash for routing
   useEffect(() => {
@@ -277,6 +284,18 @@ function App() {
         box-shadow: 0 0 0 8px rgba(102, 126, 234, 0);
       }
     }
+
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    .mode-btn.apex-demo-btn:hover {
+      background: #10b981;
+      color: white;
+      border-color: #10b981;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+    }
   `;
 
   // Integrated Simulation mode - SIMPLIFIED!
@@ -512,6 +531,14 @@ function App() {
           isOpen={isChatbotOpen}
           hasNewMessages={false}
         />
+
+        {/* Apex Precision 3D Demo - Full Screen Overlay */}
+        {showApexDemo && (
+          <ApexPrecisionDemo onClose={() => {
+            console.log('[APEX] Closing demo');
+            setShowApexDemo(false);
+          }} />
+        )}
       </div>
     </div>
   )

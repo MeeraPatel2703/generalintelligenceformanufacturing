@@ -1,7 +1,7 @@
 import { readFile } from 'fs/promises';
 import * as path from 'path';
 import { DocumentParseResult } from '../src/types/extraction';
-import { safeLog, safeError } from './safeConsole.js';
+import { safeLog, safeError } from './safeConsole';
 
 // Dynamic imports for document parsers
 let pdfParse: any;
@@ -10,8 +10,8 @@ let mammoth: any;
 async function loadParsers() {
   if (!pdfParse) {
     const pdfModule = await import('pdf-parse');
-    // pdf-parse v2.x exports PDFParse as a named export
-    pdfParse = pdfModule.PDFParse;
+    // pdf-parse v1.x exports default function
+    pdfParse = pdfModule.default;
   }
   if (!mammoth) {
     mammoth = await import('mammoth');
@@ -26,12 +26,11 @@ async function parsePDF(filePath: string): Promise<DocumentParseResult> {
     await loadParsers();
 
     const dataBuffer = await readFile(filePath);
-    // pdf-parse v2.x requires 'new' keyword with document initialization
-    const parser = new pdfParse({ data: dataBuffer });
-    const textResult = await parser.getText();
+    // pdf-parse v1.x is a function that takes a buffer
+    const data = await pdfParse(dataBuffer);
 
-    const text = textResult.text;
-    const pageCount = textResult.pages.length;
+    const text = data.text;
+    const pageCount = data.numpages;
 
     return {
       success: true,

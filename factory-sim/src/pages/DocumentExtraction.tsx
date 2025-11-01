@@ -3,6 +3,7 @@ import { ExtractedSystem } from '../types/extraction';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { SimpleIndustrialSim } from '../components/SimpleIndustrialSim';
 import { EditableConfigPage } from './EditableConfigPage';
+import { DynamicFactory3D } from '../components/DynamicFactory3D';
 import { useDESModelStore } from '../store/desModelStore';
 import '../styles/industrial-theme.css';
 
@@ -32,6 +33,7 @@ export function DocumentExtraction() {
   const [simulationResults, setSimulationResults] = useState<any>(null);
   const [showLiveView, setShowLiveView] = useState(true);
   const [showEditConfig, setShowEditConfig] = useState(false);
+  const [show3DView, setShow3DView] = useState(false);
 
   // DES Model Store
   const { setExtractedSystem: setDESSystem } = useDESModelStore();
@@ -416,6 +418,19 @@ export function DocumentExtraction() {
               <button
                     className="industrial-button"
                 onClick={() => {
+                  console.log('[DocumentExtraction] Show 3D View clicked');
+                  setShow3DView(true);
+                    }}
+                    style={{
+                      background: 'linear-gradient(135deg, #10b981, #059669)',
+                      borderColor: '#10b981',
+                    }}
+                  >
+                    🏭 Show 3D View
+              </button>
+              <button
+                    className="industrial-button industrial-button--secondary"
+                onClick={() => {
                   setDESSystem(extractedSystem);
                       window.location.hash = '/simulation';
                     }}
@@ -491,6 +506,17 @@ export function DocumentExtraction() {
       {/* Simulation Component - Rendered outside blueprint container for clean display */}
       {extractedSystem && showLiveView && (
         <SimpleIndustrialSim system={extractedSystem} />
+      )}
+
+      {/* 3D View - Full screen overlay */}
+      {show3DView && extractedSystem && (
+        <DynamicFactory3D
+          extractedSystem={extractedSystem}
+          onClose={() => {
+            console.log('[DocumentExtraction] Closing 3D view');
+            setShow3DView(false);
+          }}
+        />
       )}
     </ErrorBoundary>
   );

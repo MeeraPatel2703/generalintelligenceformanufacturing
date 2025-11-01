@@ -8,9 +8,9 @@
  * calculations for PDF-extracted systems.
  */
 
-import type { ExtractedSystem } from '../../src/types/extraction.js';
-import type { FactoryAnalysis } from '../../src/types/analysis.js';
-import { GenericDESModel } from './SystemToDESMapper.js';
+import type { ExtractedSystem } from '../../src/types/extraction';
+import type { FactoryAnalysis } from '../../src/types/analysis';
+import { GenericDESModel } from './SystemToDESMapper';
 
 /**
  * Run ExtractedSystem simulation and convert to FactoryAnalysis format

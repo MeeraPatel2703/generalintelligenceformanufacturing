@@ -5,9 +5,9 @@
  * Manages state, queue, and processes parts.
  */
 
-import { Distribution } from './distributions.js';
-import { Part } from './part.js';
-import { MachineState, MachineConfig } from '../../src/types/simulation.js';
+import { Distribution } from './distributions';
+import { Part } from './part';
+import { MachineState, MachineConfig } from '../../src/types/simulation';
 
 export class Machine {
   // Identity

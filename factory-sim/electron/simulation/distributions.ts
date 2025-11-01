@@ -4,8 +4,8 @@
  * All distributions are validated and guaranteed to return non-negative values.
  */
 
-import { RandomNumberGenerator } from './rng.js';
-import { ProcessTimeConfig } from '../../src/types/simulation.js';
+import { RandomNumberGenerator } from './rng';
+import { ProcessTimeConfig } from '../../src/types/simulation';
 
 export abstract class Distribution {
   abstract sample(rng: RandomNumberGenerator): number;

@@ -5,19 +5,19 @@
  * Handles arrivals, processing, transfers, blocking, and statistics collection.
  */
 
-import { EventQueue } from './eventQueue.js';
-import { RandomNumberGenerator } from './rng.js';
-import { Machine } from './machine.js';
-import { Part } from './part.js';
-import { Distribution, createDistribution } from './distributions.js';
-import { ReplicationStatistics, AggregateStatistics } from './statistics.js';
+import { EventQueue } from './eventQueue';
+import { RandomNumberGenerator } from './rng';
+import { Machine } from './machine';
+import { Part } from './part';
+import { Distribution, createDistribution } from './distributions';
+import { ReplicationStatistics, AggregateStatistics } from './statistics';
 import {
   SimulationConfig,
   SimulationEvent,
   SimulationResults,
   ReplicationResult,
   EventType
-} from '../../src/types/simulation.js';
+} from '../../src/types/simulation';
 
 export class SimulationEngine {
   // Configuration

@@ -3,7 +3,7 @@
  * Implements sophisticated selection rules and dispatching algorithms
  */
 
-import { Entity, Resource } from './DESEngine.js'
+import { Entity, Resource } from './DESEngine'
 
 // ============================================================================
 // ROUTING RULES

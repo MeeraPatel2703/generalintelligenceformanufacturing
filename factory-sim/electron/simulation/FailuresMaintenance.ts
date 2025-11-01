@@ -3,7 +3,7 @@
  * Implements MTBF/MTTR, scheduled maintenance, and downtime tracking
  */
 
-import { DESEngine, EventType, Distributions } from './DESEngine.js'
+import { DESEngine, EventType, Distributions } from './DESEngine'
 
 // ============================================================================
 // FAILURE MODELS

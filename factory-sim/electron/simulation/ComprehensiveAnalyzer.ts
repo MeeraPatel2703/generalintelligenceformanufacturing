@@ -17,7 +17,7 @@ import {
   ComprehensiveSimulationResults,
   ImprovementScenario,
   SimulationConfig
-} from '../../src/types/simulation.js';
+} from '../../src/types/simulation';
 
 export class ComprehensiveAnalyzer {
   private readonly DISCOUNT_RATE = 0.12; // 12% cost of capital

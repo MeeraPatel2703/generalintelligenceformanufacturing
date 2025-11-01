@@ -3,7 +3,7 @@
  * Implements work shifts, breaks, holidays, and resource availability schedules
  */
 
-import { DESEngine, EventType } from './DESEngine.js'
+import { DESEngine, EventType } from './DESEngine'
 
 // ============================================================================
 // CALENDAR SYSTEM

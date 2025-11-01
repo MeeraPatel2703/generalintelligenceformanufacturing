@@ -2,8 +2,8 @@
  * Maps extracted system specifications to DES models
  */
 
-import { DESEngine, EventType, SimEvent, Entity, ObservationStatistic } from './DESEngine.js'
-import type { ExtractedSystem, Entity as EntityDef, Process as ProcessDef } from '../../src/types/extraction.js'
+import { DESEngine, EventType, SimEvent, Entity, ObservationStatistic } from './DESEngine'
+import type { ExtractedSystem, Entity as EntityDef, Process as ProcessDef } from '../../src/types/extraction'
 
 /**
  * Generic DES Model created from extracted system
